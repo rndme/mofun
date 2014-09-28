@@ -58,7 +58,6 @@ http://fungusjs.com/  (cool in the future)
 
 */
 
-
 var F = {
 	$: function(css, root) { // returns an array of elements matching the CSS selector given to the first argument. the 2nd arg (optional) spcifies a root node to look under.
 		root = root || document.documentElement;
@@ -67,11 +66,11 @@ var F = {
 
 
 	$w: function(s) { // Splits a string into an Array, treating all white-space as delimiters. Equivalent to Ruby's %w{foo bar} or Perl's qw(foo bar).
-		return (""+s).trim().split(/\s+/);
+		return ("" + s).trim().split(/\s+/);
 	},
 
 	$c: function(s) { // Splits a string into an Array, treating commas as delimiters. 
-		return (""+s).trim().split(",");
+		return ("" + s).trim().split(",");
 	},
 
 
@@ -95,46 +94,48 @@ var F = {
 
 	abs: Math.abs, // returns the absolute value of a numerical value given to the first argument
 
-	add: function(v){ // adds this onto the first argument. use F.sum() to add two arguments.
+	add: function(v) { // adds this onto the first argument. use F.sum() to add two arguments.
 		return v + this;
 	},
 
-	addProperty: function(o){ // given a [key,value] array as this, sets that value on the first argument
-		o[this[0]]=this[1];
+	addProperty: function(o) { // given a [key,value] array as this, sets that value on the first argument
+		o[this[0]] = this[1];
 		return o;
 	},
-	
 
-	
-	addNumber: function(n){ // adds this onto the first argument. coerces to Number to avoid accidental concatenation. 
+
+
+	addNumber: function(n) { // adds this onto the first argument. coerces to Number to avoid accidental concatenation. 
 		return +n + +this;
 	},
 
-	
-	allProps: function(v){ // returns a list of all properties, own and inherited, enumerable and non
-		var r=Object.getOwnPropertyNames(v);
-		for(var i in v){ if(r.indexOf(i)===-1) r.push(i); }
+
+	allProps: function(v) { // returns a list of all properties, own and inherited, enumerable and non
+		var r = Object.getOwnPropertyNames(v);
+		for (var i in v) {
+			if (r.indexOf(i) === -1) r.push(i);
+		}
 		return r;
 	},
-	
-	
+
+
 	argument: function() { // returns the argument slot specified by a numerical this value.
 		return arguments[this];
 	},
 
 
-	appendProperty: function(o){ // given a [key,value] array as this, appends that value to an existing property on the first argument
-		o[this[0]]+=this[1];
+	appendProperty: function(o) { // given a [key,value] array as this, appends that value to an existing property on the first argument
+		o[this[0]] += this[1];
 		return o;
 	},
-	
+
 	assign: function(o, s) { // returns a function that assigns it's received first argument to the object and property specified
 		return function(v) {
 			return o[s] = v;
 		};
 	},
 
-	
+
 	avg: function(v, i, r) { // returns the value divided by the number of items in the third argument; a running average. usage: [1,2,3].map(F.avg, [0]).pop().
 		return this[0] += v / r.length, this[0];
 	},
@@ -145,25 +146,25 @@ var F = {
 	},
 
 
-	bind: Function.call.bind(Function.bind), // creates a new function with a frozen this set by the first argument, and additional arguments curried in front of the new function's parameters..
+	bind: Function.call.bind(Function.bind), // creates a new function with a frozen this set by the first argument, and additional arguments curried in front of the new function's parameters
 
 
-	blank: Function.call.bind(/\S/.test), // returns true if the first argument is an empty or white-space-only string
-	
-	c: function(a,b,c) { // returns the third argument
+	blank: Function.call.bind(/^\S*$/.test), // returns true if the first argument is an empty or white-space-only string
+
+	c: function(a, b, c) { // returns the third argument
 		return c;
 	},
-	
-	call: function(f){
+
+	call: function(f) {
 		return Function.call.bind(f);
 	}, // turns a method first argument into a function with call-style arity
-	
-	camelize: function(s){ // convert a stringy first argument from separated-by-dashes-format to camelCaseFormat
+
+	camelize: function(s) { // convert a stringy first argument from separated-by-dashes-format to camelCaseFormat
 		return "".replace.call(s, /\-([a-z])?/g, function(j, x) {
 			return x.toUpperCase();
 		});
 	},
-  
+
 
 	capture: function() { // returns an array of all the arguments
 		return [].slice.call(arguments);
@@ -173,46 +174,48 @@ var F = {
 	ceil: Math.ceil, // returns the closes integer furthest from zero from the number passed to the first argument
 
 
-	censor: function(r){ // given an object first argument and a string array this, returns the object without properties listed in the array.
-		this.forEach(function(k){delete this[k]}, r);
+	censor: function(r) { // given an object first argument and a string array this, returns the object without properties listed in the array.
+		this.forEach(function(k) {
+			delete this[k]
+		}, r);
 		return r;
 	},
 
-		
-	changed: function(v, i, r) {// used with [].filter, returns true if the current element is different than as the previous one. see also: F.repeated
+
+	changed: function(v, i, r) { // used with [].filter, returns true if the current element is different than as the previous one. see also: F.repeated
 		return r[i - 1] !== v;
 	},
 
-	chars: function(s) {// returns an array of all the chars in a string version of the first argument
+	chars: function(s) { // returns an array of all the chars in a string version of the first argument
 		return String.prototype.split.call(s, "");
 	},
-	
-	char: function(s){  // returns first char code of stringy argument 
-	 return (""+s).charCodeAt(0);
+
+	char: function(s) { // returns first char code of stringy argument 
+		return ("" + s).charCodeAt(0);
 	},
-	
-	clean: function(s){ // given a string argument, replaces padding white-space and condenses multiple white-spaces into one space
-      return String.prototype.replace.call(s, /\s+/g, " ").trim();
-    },
+
+	clean: function(s) { // given a string argument, replaces padding white-space and condenses multiple white-spaces into one space
+		return String.prototype.replace.call(s, /\s+/g, " ").trim();
+	},
 
 
-	clone: function(o, bInherit){ // given an object argument, returns a deep copy that links to sub-objects "by-ref", and duplicates primitives. bInherit copies non-owns
-        var o2={};
-		for (var k in o) if(bInherit||[].hasOwnProperty.call(o,k))  o2[k]= o[k];
+	clone: function(o, bInherit) { // given an object argument, returns a deep copy that links to sub-objects "by-ref", and duplicates primitives. bInherit copies non-owns
+		var o2 = {};
+		for (var k in o) if (bInherit || [].hasOwnProperty.call(o, k)) o2[k] = o[k];
 		return o2;
-    },
-	
+	},
 
 
-	
-	
+
 	compact: function(v) { // used with [].filter(), returns a copy of the array without any null or undefined values.
 		return v != null;
 	},
 
 	compose: function(f) { // compose a function 1st argument with a function this value to return a composition. the function by this should expect 1 arg.
-		var that=this;
-		return function(){ return that.call(this, f.apply(this, arguments));};
+		var that = this;
+		return function() {
+			return that.call(this, f.apply(this, arguments));
+		};
 	},
 
 
@@ -226,50 +229,54 @@ var F = {
 	},
 
 
-	count: function count(o, v, i) {  // for [].reduce, given an object and array of value, adds a value count to the object under a key set by the value. 
-		if(i===1) o={};
-		o[v]= o[v] ? (o[v] + 1) : 1;
+	count: function count(o, v, i) { // for [].reduce, given an object and array of value, adds a value count to the object under a key set by the value. 
+		if (i === 1) o = {};
+		o[v] = o[v] ? (o[v] + 1) : 1;
 		return o;
 	},
 
-	
-	dasherize:  function(s) { // converts a stringy first argument from camelCaseFormat to separated-by-dashes-format
-		return (s+'').replace( /([a-z\d])([A-Z])/g, '$1-$2').toLowerCase();
+
+	dasherize: function(s) { // converts a stringy first argument from camelCaseFormat to separated-by-dashes-format
+		return (s + '').replace(/([a-z\d])([A-Z])/g, '$1-$2').toLowerCase();
 	},
-	
+
 
 	dataURL: function(s) { // given a stringy first argument and an option string this to indicate mime type, returns a dataURL contain the first argument
-		return "data:" + ( this==(""+this) ? this : "text/plain") +  "," + encodeURIComponent(""+s);
+		return "data:" + (this == ("" + this) ? this : "text/plain") + "," + encodeURIComponent("" + s);
 	},
 
-	delProperty: function(o){ // delete a property of the first argument named by this. faster than F.censor for removing a single property
+	delProperty: function(o) { // delete a property of the first argument named by this. faster than F.censor for removing a single property
 		delete o[this];
 		return o;
 	},
 
 
-	delMatch: function(o){ // given an object first argument and a regexp this, returns the object without properties matched by the regexp
-		Object.keys(o).filter(/./.test, this).forEach(function(k){delete o[k];});
+	delMatch: function(o) { // given an object first argument and a regexp this, returns the object without properties matched by the regexp
+		Object.keys(o).filter(/./.test, this).forEach(function(k) {
+			delete o[k];
+		});
 		return o;
 	},
 
 
-	deBounce: function(f, n){ // snuffs repeated calls to the function given by the first argument until a specified duration (by the 2nd argument) from the last call has elapsed
+	deBounce: function(f, n) { // snuffs repeated calls to the function given by the first argument until a specified duration (by the 2nd argument) from the last call has elapsed
 		var ok;
-		return function(){
-			if(ok) return;
-			ok=true;
+		return function() {
+			if (ok) return;
+			ok = true;
 			f.apply(this, arguments);
-			setTimeout(function(){ok= false;}, n||100);
-		};		
-	}, 
-	
-		
-	dec:	function(n) { // decrements a numerical argument by one or by a number specified by this
-		n-= +this || 1 ;
+			setTimeout(function() {
+				ok = false;
+			}, n || 100);
+		};
+	},
+
+
+	dec: function(n) { // decrements a numerical argument by one or by a number specified by this
+		n -= +this || 1;
 		return n;
 	},
-	
+
 	defer: setTimeout, // given a function, waits the #of ms specified by the 2nd argument to execute the function
 
 
@@ -278,16 +285,16 @@ var F = {
 	},
 
 	delta: function(v, n, r) { // used with [].map/filter, returns the difference with the last element, or 0.
-		return n ? (r[n-1]-v) : 0;
+		return n ? (r[n - 1] - v) : 0;
 	},
-	
-	
-	difference: function(v) {// Similar to without, but returns the values from argument that are not present in this
-		return this.indexOf(v)===-1;
+
+
+	difference: function(v) { // Similar to without, but returns the values from argument that are not present in this
+		return this.indexOf(v) === -1;
 	},
-	
-	
-	divide: function(n){ // divides this by a numerical first argument. 
+
+
+	divide: function(n) { // divides this by a numerical first argument. 
 		return n / this;
 	},
 
@@ -295,11 +302,11 @@ var F = {
 		return r.lastIndexOf(v) === i;
 	},
 
-	
-	endsWith: function(s){ // returns true if the argument ends with this
+
+	endsWith: function(s) { // returns true if the argument ends with this
 		return s.lastIndexOf(this) + this.length === s.length;
 	},
-	
+
 
 
 	equal: function(v) { // returns true if the argument is exactly the same as a value given by this
@@ -310,36 +317,36 @@ var F = {
 	equiv: function(v) { // returns true if the argument is loosely the same as a value given by this
 		return v == this;
 	},
- 
+
 
 	encode: encodeURIComponent.bind(this), // returns a url query parameter-safe string from an arbitrary string
-	
-	
+
+
 	escapeHTML: function(s) { // escapes reserved HTML chars into entities for safe display of html code
-		return (""+s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+		return ("" + s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 	},
 
 
-	escapeRX: function(s){ // returns a string safe to feed to "new RegExp()" without invoking regexp special characters
-      return (""+(s||"")).replace(/([.+?^\-*=!:${(})\|[\]\/\\])/g, '\\$1');
-    },
+	escapeRX: function(s) { // returns a string safe to feed to "new RegExp()" without invoking regexp special characters
+		return ("" + (s || "")).replace(/([.+?^\-*=!:${(})\|[\]\/\\])/g, '\\$1');
+	},
 
 	even: function(n) { // returns true if the argument is an even numerical value
 		return n % 2 === 0;
 	},
 
-	
-	exec: function(f){ // executes a function in the first argument with additional arguments curried
-		return f.apply(this, [].slice.call(arguments,1));
+
+	exec: function(f) { // executes a function in the first argument with additional arguments curried
+		return f.apply(this, [].slice.call(arguments, 1));
 	},
-	
+
 
 	extend: function extend(o, o2) { // given an object as the first argument, adds to it properties owned by further object arguments 
-		for (var k in o2) if([].hasOwnProperty.call(o2,k)) o[k]= o2[k];
-		if(arguments.length>2) extend.apply(this, [o].concat([].slice.call(arguments,2)));
-      return o;
-    },
-  
+		for (var k in o2) if ([].hasOwnProperty.call(o2, k)) o[k] = o2[k];
+		if (arguments.length > 2) extend.apply(this, [o].concat([].slice.call(arguments, 2)));
+		return o;
+	},
+
 
 	extract: function(o) { // returns a property named by this from the object passed to the first argument. alias for F.pluck.
 		return o[this];
@@ -348,18 +355,18 @@ var F = {
 	extractThis: function(k) { // returns a property named by the first argument from the object passed to this.
 		return this[k];
 	},
-	
-	
+
+
 	extractList: function(o) { // returns an array of values contained by properties named by an array as this from the object passed to the first argument
 		return this.map(function(t) {
 			return o[t];
 		});
 	},
-	
+
 	extractObject: function(o) { // returns an object of key:values contained by properties named by an array as this from the object passed to the first argument
-		var o2={};
+		var o2 = {};
 		this.forEach(function(t) {
-			return o2[t]=o[t];
+			return o2[t] = o[t];
 		});
 		return o2;
 	},
@@ -376,51 +383,52 @@ var F = {
 
 
 	first: function(sr) { // returns the first value of the first argument, be it a string or array (not ie7 compat)
-		return sr.slice(0,1)[0]
+		return sr.slice(0, 1)[0]
 	},
 
 
 	floor: Math.floor, // returns an integer closest to zero from the number passed to the first argument
 
 
-	formatNumber: function(n){ // returns a pretty string from a numerical first argument with commas separating out large numbers. set this a number to limit the # of decimals
-		n=(""+n).split(".");
-		return n[0].replace(/(\d)(?=(?:\d{3})+$)/g, "$1," ) + 
-			 ( n[1] ? ("." + n[1].slice(0, +this || 35)) : "");
-	},
-	
-	getComments: function(s){ // returns multi-line comments (js/css/php/etc) from a stringy first argument
-		return ((s+'').match(/\/\*([\w\W]+?)\*\//g) || []).map(function(a){return a.slice(2,-2)}).join("\n");
+	formatNumber: function(n) { // returns a pretty string from a numerical first argument with commas separating out large numbers. set this a number to limit the # of decimals
+		n = ("" + n).split(".");
+		return n[0].replace(/(\d)(?=(?:\d{3})+$)/g, "$1,") + (n[1] ? ("." + n[1].slice(0, + this || 35)) : "");
 	},
 
-	
+	getComments: function(s) { // returns multi-line comments (js/css/php/etc) from a stringy first argument
+		return ((s + '').match(/\/\*([\w\W]+?)\*\//g) || []).map(function(a) {
+			return a.slice(2, - 2)
+		}).join("\n");
+	},
+
+
 	gt: function(v) { // greater than value compare
 		return v > this;
 	},
 
 
-	gte: function(v) {// greater than or equals value compare	(use: )
-		return v >= this;	
+	gte: function(v) { // greater than or equals value compare	(use: )
+		return v >= this;
 	},
 
 
 	groupBy: function(r, s) { // given an array, returns an object or arrays keyed by a specified property of each array element
-		var ret={};
-		r.forEach(function(a){
-			var k=a[s], 
-			b=ret[k]||(ret[k]=[]);
+		var ret = {};
+		r.forEach(function(a) {
+			var k = a[s],
+				b = ret[k] || (ret[k] = []);
 			b.push(a);
 		});
 		return ret;
 	},
-	
-	
+
+
 	guard: function(v, n) { //given a function, limits the accepted # of arguments to that function to the number specified by the 2nd argument. prevents array methods from seeing the collection.
 		return function() {
-			return v.call(this, [].slice.call(arguments, 0, +n || 99));
+			return v.call(this, [].slice.call(arguments, 0, + n || 99));
 		}
 	},
-	
+
 
 
 	has: function(o) { // returns true when the object of the first argument includes own or inherited properties named by a string this
@@ -435,15 +443,15 @@ var F = {
 	hasOwnThis: function(s) { // returns true when the object of this includes own (not inherited) properties named by a string first argument
 		return [].hasOwnProperty.call(this, s);
 	},
-	
-	inc:	function(n) { // increments a numerical argument by one or by a number specified by this
-		n+= +this || 1 ;
+
+	inc: function(n) { // increments a numerical argument by one or by a number specified by this
+		n += +this || 1;
 		return n;
 	},
-	
+
 
 	initial: function(sr) { // returns all but the last values of the first argument, be it a string or array (not ie7 compat)
-		return sr.slice( (-1 * this) || -1)[0]
+		return sr.slice((-1 * this) || -1)[0]
 	},
 
 
@@ -457,14 +465,16 @@ var F = {
 		return v[this]();
 	},
 
-	
-	is: Object.is || function(v,v2){return v===v2 || (isNaN(v)&&isNaN(v2)); }, // returns true if the first argument is the same as the 2nd
+
+	is: Object.is || function(v, v2) {
+		return v === v2 || (isNaN(v) && isNaN(v2));
+	}, // returns true if the first argument is the same as the 2nd
 
 	isArray: Array.isArray.bind(Array), // returns true if the argument is an array
 
 
 	isBoolean: function(v) { // returns true if the argument is a strict boolean value
-		return v===true||v===false;
+		return v === true || v === false;
 	},
 
 
@@ -480,7 +490,7 @@ var F = {
 
 	isTrue: Boolean, // returns true if the argument is not "",0,false,undefined,null,or NaN
 
-	isType: function(v) {// returns true if the argument is of the type specified by this
+	isType: function(v) { // returns true if the argument is of the type specified by this
 		return typeof v == this;
 	},
 
@@ -498,7 +508,7 @@ var F = {
 	},
 
 	isEmail: RegExp.prototype.test.bind(/\S+@\S+\.\S+/), // returns true if the argument is a potentially valid email address
-	
+
 	isEmpty: function(v) { // returns true if the object is false, and empty array ([]), or an empty object ({})
 		if (!v) return !0;
 		for (var i in v) if ([].hasOwnProperty.call(v, i)) return !1;
@@ -524,7 +534,7 @@ var F = {
 
 
 	isNumber: function(v) { // returns true ifs the argument is a strong Number
-		return (+v || v === 0) && typeof v==="number";
+		return (+v || v === 0) && typeof v === "number";
 	},
 
 	isNumerical: function(v) { // returns true if the argument can be used as a number
@@ -538,10 +548,10 @@ var F = {
 
 
 	isPlainObject: function(v) { // returns true if the argument is an Object from a literal, JSON, or "new Something()"
-		return typeof v==="object" && v.constructor===Object;
+		return typeof v === "object" && v.constructor === Object;
 	},
 
-	isOwn: Function.call.bind([].hasOwnProperty),// returns true if the first argument is an object with the 2nd argument as a non-inherited property.
+	isOwn: Function.call.bind([].hasOwnProperty), // returns true if the first argument is an object with the 2nd argument as a non-inherited property.
 
 
 	isPos: function(n) { // returns true if the argument is greater than or equal to zero
@@ -577,11 +587,11 @@ var F = {
 	lcase: Function.call.bind(String.prototype.toLowerCase), // returns a lower-case version of the value passed to the first argument
 
 
-	left: function(sr){ // returns a slice from the left a numerical value given to this # of slots
-		return sr.slice(0, +this);
+	left: function(sr) { // returns a slice from the left a numerical value given to this # of slots
+		return sr.slice(0, + this);
 	},
 
-	less: function(n, n2) {// returns the smaller of two (and only two) numerical values. (Math.min accepts unlimited arguments)
+	less: function(n, n2) { // returns the smaller of two (and only two) numerical values. (Math.min accepts unlimited arguments)
 		return Math.min(n, n2);
 	},
 
@@ -601,18 +611,16 @@ var F = {
 	},
 
 
-	max: Function.apply.bind(Math.max,Math), // returns the largest value in an array given to the first argument. use Math.max to find the max of many arguments instead of an array.
+	max: Function.apply.bind(Math.max, Math), // returns the largest value in an array given to the first argument. use Math.max to find the max of many arguments instead of an array.
 
-	
-	memomize: function(f){ // memorizes calls to the function given by the first argument by it's first argument, returning the stored value if available
-		var cache={}, has=cache.hasOwnProperty.bind(cache);
-		return function(x){
-			return has(x) ?  
-			 cache[x] :
-			 (cache[x]=f.apply(this.arguments));
-		};		
-	}, 
-	
+
+	memomize: function(f) { // memorizes calls to the function given by the first argument by it's first argument, returning the stored value if available
+		var cache = {}, has = cache.hasOwnProperty.bind(cache);
+		return function(x) {
+			return has(x) ? cache[x] : (cache[x] = f.apply(this.arguments));
+		};
+	},
+
 
 	method: function(v, i, r) { // calls a method on the first argument given by an array as this: ["methodName", [...optionalMoreArgs]]
 		return v[this[0]].apply(v, this.slice(1));
@@ -620,36 +628,37 @@ var F = {
 
 
 	methods: function(e, t, n) { // calls a method on the first argument given by an array as this: ["methodName", ["call1arg1","call2arg1","call3arg1"...]]
-		var k=this.shift();
-		return this.pop().map(function(a){
+		var k = this.shift();
+		return this.pop().map(function(a) {
 			return e[k].call(e, a);
 		});
 	},
 
 
-	min: Function.apply.bind(Math.min,Math), // returns the smallest value in an array given to the first argument. use Math.min to find the min of many arguments instead of an array.
+	min: Function.apply.bind(Math.min, Math), // returns the smallest value in an array given to the first argument. use Math.min to find the min of many arguments instead of an array.
 
 
-	mod: function(n){ // returns the division remainder (modulo) from dividing the first argument by this 
+	mod: function(n) { // returns the division remainder (modulo) from dividing the first argument by this 
 		return n % this;
 	},
-	
-	
-	modifyProperty: function(o){ // modifies a property of the first argument named by this[0] and specified by this[1](o[[this][0]])
-		var f=this[1], k=this[0];
-		o[k]=f.call(o, o[k]);
+
+
+	modifyProperty: function(o) { // modifies a property of the first argument named by this[0] and specified by this[1](o[[this][0]])
+		var f = this[1],
+			k = this[0];
+		o[k] = f.call(o, o[k]);
 		return o;
 	},
 
-	
+
 	more: function(v, v2) { // returns the larger of two (and only two) numerical values. (Math.max accepts unlimited arguments)
 		return Math.max(v, v2);
 	},
 
-	multiply: function(n){ // multiplies this by a numerical first argument. 
+	multiply: function(n) { // multiplies this by a numerical first argument. 
 		return n * this;
 	},
-	
+
 
 	negate: function(f) { // returns a function from the first argument that returns the boolean opposite of what it used to
 		return function() {
@@ -673,44 +682,53 @@ var F = {
 	},
 
 
-	once: function(f){ // makes a copy of a function that can only be called once. Subsequent calls will have no effect, returning the value from the first call.
-              var spent=false;
-		return function(){ if(spent)return f; spent=true; return f=f.apply(this,arguments);}
+	once: function(f) { // makes a copy of a function that can only be called once. Subsequent calls will have no effect, returning the value from the first call.
+		var spent = false;
+		return function() {
+			if (spent) return f;
+			spent = true;
+			return f = f.apply(this, arguments);
+		}
 	},
 
 
 
 	obKeysx: function(o) { // returns an array of enumerable property names in an object, including inherited properties
-		var t=[], n=0;
-		for(var r in o) t[n++]= r;
+		var t = [],
+			n = 0;
+		for (var r in o) t[n++] = r;
 		return t;
 	},
 
 
 	obMap: function(o) { // from each own key:value pain in an object, returns a 2-col array of [key,value], good for feeding to array methods.
-		var t=[], n=0;
-		for(var r in o) o.hasOwnProperty(r) && (t[n++]= [r, o[r]]);
+		var t = [],
+			n = 0;
+		for (var r in o) o.hasOwnProperty(r) && (t[n++] = [r, o[r]]);
 		return t;
 	},
 
 
-	obMapx: function(o) {// from each key:value pain in an object, including inherited ones, returns a 2-col array of [key,value], good for feeding to array methods.
-		var t=[], n=0;
-		for(var r in o) t[n++]= [r, o[r]];
+	obMapx: function(o) { // from each key:value pain in an object, including inherited ones, returns a 2-col array of [key,value], good for feeding to array methods.
+		var t = [],
+			n = 0;
+		for (var r in o) t[n++] = [r, o[r]];
 		return t;
 	},
 
 
 	obVals: function(o) { // returns an array of enumerable own property values in an object 
-		var t=[], n=0;
-		for(var r in o) o.hasOwnProperty(r) && (t[n++]= o[r]);
+		var t = [],
+			n = 0;
+		for (var r in o) o.hasOwnProperty(r) && (t[n++] = o[r]);
 		return t;
 	},
 
 
 	obValsx: function(o) { // returns an array of enumerable property names in an object, including inherited properties
-		var t=[], n=0;
-		for(var r in o) t[n++]= o[r];
+		var t = [],
+			n = 0;
+		for (var r in o) t[n++] = o[r];
 		return t;
 	},
 
@@ -723,20 +741,24 @@ var F = {
 	ok: function(v) { // returns true if the argument is not null or undefined. alias for isDefined, among others.
 		return v != null;
 	},
-	
-	
-	pairMap: function(r){ // applies a function specified by this to an array by the first argument
+
+
+	pairMap: function(r) { // applies a function specified by this to an array by the first argument
 		return this.apply(r[0], r);
 	},
-	
-	partial: function(fn){ // Partially apply a function in the first arguments by filling in any number of its arguments, without changing its dynamic this value. 
-		var args=[].slice.call(arguments,1);
-		return function(){return fn.apply(this, args.concat([].slice.call(arguments)));}
+
+	partial: function(fn) { // Partially apply a function in the first arguments by filling in any number of its arguments, without changing its dynamic this value. 
+		var args = [].slice.call(arguments, 1);
+		return function() {
+			return fn.apply(this, args.concat([].slice.call(arguments)));
+		}
 	},
 
 	partition: function(arr, fnDecide) { // splits a collection into two arrays: one whose elements all satisfy the given predicate, and one whose elements all do not satisfy the predicate.
 		var oks = arr.filter(fnDecide),
-			bads = arr.filter(function(e){return this.indexOf(e)===-1;} , oks);
+			bads = arr.filter(function(e) {
+				return this.indexOf(e) === -1;
+			}, oks);
 		return [oks, bads];
 	},
 
@@ -747,9 +769,9 @@ var F = {
 
 
 	pick: function(o) { // copies an object, filtered to only have values  white-listed by an array of valid keys. includes inherited properties (so it can use the DOM).
-		var temp={};
-		this.forEach(function(k){
-			if( this[k]!==undefined ) temp[k]=this[k];
+		var temp = {};
+		this.forEach(function(k) {
+			if (this[k] !== undefined) temp[k] = this[k];
 		}, o);
 		return temp;
 	},
@@ -760,17 +782,19 @@ var F = {
 		return o[this];
 	},
 
-	
+
 	populate: function(r) { // fills an array with value of this or calling this (if function) against the arguments
-		 for(var i=0, m=r.length;i<m;i++){ r[i] = this.apply ? this.apply(v, arguments) : this; }
-		 return r;
+		for (var i = 0, m = r.length; i < m; i++) {
+			r[i] = this.apply ? this.apply(v, arguments) : this;
+		}
+		return r;
 	},
-	
-	prependProperty: function(o){ // given a [key,value] array as this, prepends that value to an existing property on the first argument
-		o[this[0]]=this[1]+o[this[0]];
+
+	prependProperty: function(o) { // given a [key,value] array as this, prepends that value to an existing property on the first argument
+		o[this[0]] = this[1] + o[this[0]];
 		return o;
 	},
-	
+
 	prepend: function(s) { // prepends this onto string passed as the first argument. like F.add, but backwards. has same effect on numbers as F.add
 		return this + s;
 	},
@@ -784,22 +808,24 @@ var F = {
 	properties: Object.getOwnPropertyNames, // returns an array of all own property names in an object 
 
 
-	quote: function(s){ // escapes nested quotes and restricted white-space and wraps quotes around a stringy first argument to form a valid JS string literal
-		return JSON.stringify(""+s).replace(/\\t/g,"	");
+	quote: function(s) { // escapes nested quotes and restricted white-space and wraps quotes around a stringy first argument to form a valid JS string literal
+		return JSON.stringify("" + s).replace(/\\t/g, "	");
 	},
-	
-	range: function(n){ // returns an array of numbers from 0 to n;
-		return (Array(n)+0).split("").map( Function.call.bind(Number) );
+
+	range: function(n) { // returns an array of numbers from 0 to n;
+		return (Array(n) + 0).split("").map(Function.call.bind(Number));
 	},
 
 	random: Math.random, // returns a random number between zero and one
 
 
-	regexp:  RegExp.prototype.test, // used with [].filter to match array elements with a regular expression
+	regexp: RegExp.prototype.test, // used with [].filter to match array elements with a regular expression
 
 
 	reject: function(fn) { // used with [].filter, returns true if the function, given a copy of the normal arguments, returns false. see also: F.negate
-		return function(){return !fn.apply(this,arguments);};
+		return function() {
+			return !fn.apply(this, arguments);
+		};
 	},
 
 
@@ -809,44 +835,46 @@ var F = {
 
 
 	repeat: function(s, n) { // given a string and a number, repeats that string a number of times.
-		return Array((+n||0)+2).join(s||"");
+		return Array((+n || 0) + 2).join(s || "");
 	},
-	
-	
+
+
 	repeated: function(v, i, r) { // used with [].filter, returns true if the current element is the same value as the previous one. see also: F.changed
 		return r[i - 1] === v;
 	},
 
 	replace: function(s) { // given a 2-element array as this, replaces a string first argument's matches for this[0] with this[1]
-		return (""+s).replace(this[0], this[1].call ?  this[1].bind(s) : this[1] );
-	},
-	
-	
-	resolve: function(o) { // given an array of nested property names using this, grabs value at that relative location from the argument. invokes methods (w/o args).
-		return this.reduce(function(o, k){
-			var v= o && o[k];
-			return typeof v==="function" ? v.call(o) : v;
-		}, o );
+		return ("" + s).replace(this[0], this[1].call ? this[1].bind(s) : this[1]);
 	},
 
-	reverse: function(s){  // reverses accessor property order on a stringy or array-y first argument
-		return [].slice.call(s).reverse()[typeof s==="string" ? "join" : "valueOf"]("");
+
+	resolve: function(o) { // given an array of nested property names using this, grabs value at that relative location from the argument. invokes methods (w/o args).
+		return this.reduce(function(o, k) {
+			var v = o && o[k];
+			return typeof v === "function" ? v.call(o) : v;
+		}, o);
 	},
-	
-	right: function(sr){ // returns a slice from the right a numerical value given to this # of slots
-		return sr.slice(-1*this);
+
+	reverse: function(s) { // reverses accessor property order on a stringy or array-y first argument
+		return [].slice.call(s).reverse()[typeof s === "string" ? "join" : "valueOf"]("");
+	},
+
+	right: function(sr) { // returns a slice from the right a numerical value given to this # of slots
+		return sr.slice(-1 * this);
 	},
 
 	round: Math.round, // returns an integer closest to the number passed to the first argument
 
-	
-	
-	rPartial: function(fn){ // Partially apply a function in the first arguments, later filling in any number of the result's arguments. 
-		var args=[].slice.call(arguments,1);
-		return function(){return fn.apply(this, [].slice.call(arguments).concat(args));}
+
+
+	rPartial: function(fn) { // Partially apply a function in the first arguments, later filling in any number of the result's arguments. 
+		var args = [].slice.call(arguments, 1);
+		return function() {
+			return fn.apply(this, [].slice.call(arguments).concat(args));
+		}
 	},
-	
-	
+
+
 	run: function(v) { // given a function as this, run the function passing the first argument
 		return this(v);
 	},
@@ -864,28 +892,32 @@ var F = {
 		return i === r._out;
 	},
 
-	
-	selMatch: function(o){ // given an object first argument and a regexp this, returns a new object with only properties matched by the regexp
-		var o2=o.constructor===Array ? [] : {};
-		Object.keys(o).filter(/./.test, this).forEach(function(k){ this[k]=o[k];}, o2);
+
+	selMatch: function(o) { // given an object first argument and a regexp this, returns a new object with only properties matched by the regexp
+		var o2 = o.constructor === Array ? [] : {};
+		Object.keys(o).filter(/./.test, this).forEach(function(k) {
+			this[k] = o[k];
+		}, o2);
 		return o2;
 	},
-	
-	
-	selMatchValue: function(o){ // given an object first argument and a regexp this, returns a new object with only properties whose value matches the regexp
-		var o2={};
-		Object.keys(o).forEach(function(k){ if(this.test(o[k])) o2[k]=o[k];}, this);
+
+
+	selMatchValue: function(o) { // given an object first argument and a regexp this, returns a new object with only properties whose value matches the regexp
+		var o2 = {};
+		Object.keys(o).forEach(function(k) {
+			if (this.test(o[k])) o2[k] = o[k];
+		}, this);
 		return o2;
 	},
-	
-	
+
+
 	setProp: function(o) { // given a 2-slot array as this, sets a property on the first argument named by the first this element with a value of the 2nd this element
 		o[this[0]] = this[1];
 		return o;
 	},
 
 
-	setProps: function(o) {// given an object as this, sets a property on the first argument named and set by the keys and values of the this object; a merge
+	setProps: function(o) { // given an object as this, sets a property on the first argument named and set by the keys and values of the this object; a merge
 		Object.keys(this).forEach(function(k) {
 			o[k] = this[k];
 		}, this);
@@ -893,7 +925,7 @@ var F = {
 	},
 
 
-	shuffle: function (v, i, r) { // used with [].map to randomize the order of elements in an array
+	shuffle: function(v, i, r) { // used with [].map to randomize the order of elements in an array
 		var out = i ? r.r : r.r = r.slice(),
 			ol = out.length;
 		return ol === 1 && delete r.r, out.splice(Math.floor(Math.random() * ol), 1)[0];
@@ -944,37 +976,39 @@ var F = {
 	},
 
 	sqrt: Math.sqrt, // returns the square root of the first argument
-	
-	square: function(n){ // returns the square of a numerical first argument
-		return n*n;
-	},
-	
-	startsWith:  function(s){ // returns true if the argument starts with this. use "".startsWith to go from this to the first argument
-		return s.indexOf(this)===0;
-	},
-	
-	stripComments: function(s){ // removes multi-line comments (js/css/php/etc) from a stringy first argument
-		return (s+"").replace(/\/\*([\w\W]+?)\*\//g,"");
+
+	square: function(n) { // returns the square of a numerical first argument
+		return n * n;
 	},
 
-	stripTags: function(s){ // removes well-formed xml and html tags from a stringy first argument
-		return (s+"").split(/<\/?[^>]+?>/).join("");
-    },
-	
-	subtract: function(n){ // subtracts this from a numerical first argument. 
+	startsWith: function(s) { // returns true if the argument starts with this. use "".startsWith to go from this to the first argument
+		return s.indexOf(this) === 0;
+	},
+
+	stripComments: function(s) { // removes multi-line comments (js/css/php/etc) from a stringy first argument
+		return (s + "").replace(/\/\*([\w\W]+?)\*\//g, "");
+	},
+
+	stripTags: function(s) { // removes well-formed xml and html tags from a stringy first argument
+		return (s + "").split(/<\/?[^>]+?>/).join("");
+	},
+
+	subtract: function(n) { // subtracts this from a numerical first argument. 
 		return n - this;
 	},
-	
-	
-	subFilter: function(f,s){ //returns a new function that runs on a property of the argument specified by s instead of the arguments.
- 		return function(v){ return f.call(this, v[s]); }
+
+
+	subFilter: function(f, s) { //returns a new function that runs on a property of the argument specified by s instead of the arguments.
+		return function(v) {
+			return f.call(this, v[s]);
+		}
 	},
-	
-	succ:	function(s) { // converts the last character of a string argument to the following character
-		return s.slice(0, -1) + String.fromCharCode( s.slice(-1).charCodeAt(0) + 1);
+
+	succ: function(s) { // converts the last character of a string argument to the following character
+		return s.slice(0, - 1) + String.fromCharCode(s.slice(-1).charCodeAt(0) + 1);
 	},
-  
-  
+
+
 	sum: function(sn, sn2) { // adds two numbers or concatenates two strings. good for [].reduce. use F.add for one good for [].map
 		return sn + sn2;
 	},
@@ -985,9 +1019,9 @@ var F = {
 
 
 	surround: function(s) { // surrounds a stringy first argument with a stringy this value
-      return this+str+sthis;
-    },
-	
+		return this + str + sthis;
+	},
+
 
 	tag: function(s) { // makes an html tag, name specified by this, wrapping around the value of the first argument
 		return "<" + this + ">" + s + "</" + this + ">";
@@ -999,10 +1033,12 @@ var F = {
 	},
 
 
-	template: function(o){
-		return (""+this).replace(/{{([^}]+)}}/g, function(j,a){return o[a];});
+	template: function(o) {
+		return ("" + this).replace(/{{([^}]+)}}/g, function(j, a) {
+			return o[a];
+		});
 	},
-	
+
 
 	that: function() { // returns this, like F.fill() without the dynamic capability of accepting functions.
 		return this;
@@ -1012,34 +1048,40 @@ var F = {
 	this2a: function(v) { // run method given by this on object given by first argument. unlike F.run(), the argument becomes this. use w/ methods like "".toLowerCase
 		return this.call(v);
 	},
-	
+
 	flip: function(f) { // for a 1-arg function, returns a new function from a function given as the first argument that flips this and the first argument 
-		return function(v){ return f.call(v,this);}
+		return function(v) {
+			return f.call(v, this);
+		}
 	},
-	
-	thisAt: function(s){ // given a key, returns this at the key
-		return function(){ return this[s]; };
+
+	thisAt: function(s) { // given a key, returns this at the key
+		return function() {
+			return this[s];
+		};
 	},
 
 	thisOverA: function(n) { // returns this over the first argument (division)
 		return this / n;
 	},
-	
+
 	times: function(n) { // multiplies the first argument by a numerical this value 
 		return n * this;
 	},
 
 
-	toArray:  Function.call.bind([].slice), // turns an array-like value into a true Array
+	toArray: Function.call.bind([].slice), // turns an array-like value into a true Array
 
 
 	to$: function(f) { // converts a function written for [].filter for use with $.filter, or [].forEach to $.each, or vice versa
-		return function(a,b,c){return f.call(this,b,a,c);}
+		return function(a, b, c) {
+			return f.call(this, b, a, c);
+		}
 	},
-	
-	
-	toFixed: function(n){ // limits the decimal places of a numerical first argument by this # of spaces, defaults to 2 if this is non-numeric
-		return ((1*n)||0).toFixed(+this||2);
+
+
+	toFixed: function(n) { // limits the decimal places of a numerical first argument by this # of spaces, defaults to 2 if this is non-numeric
+		return ((1 * n) || 0).toFixed(+this || 2);
 	},
 
 	trim: function(s) { // removes white-space from the start and end of a string
@@ -1047,17 +1089,19 @@ var F = {
 	},
 
 
-	trimLeft: function(s) {// removes white-space from the start of a string
-		return ("" + s).replace(/^\s+/,"");
+	trimLeft: function(s) { // removes white-space from the start of a string
+		return ("" + s).replace(/^\s+/, "");
 	},
 
 
-	trimRight: function(s) {// removes white-space from the end of a string
-		return ("" + s).replace(/\s+$/,"");
+	trimRight: function(s) { // removes white-space from the end of a string
+		return ("" + s).replace(/\s+$/, "");
 	},
 
 
-	trunc: Math.trunc || function(n){return +(""+n).split(".")[0];}, // truncates the number given to the first argument at the decimal point.
+	trunc: Math.trunc || function(n) {
+		return +("" + n).split(".")[0];
+	}, // truncates the number given to the first argument at the decimal point.
 
 	typeOf: function(v) { // returns the string type of the first argument
 		return typeof v;
@@ -1067,7 +1111,7 @@ var F = {
 	ucase: Function.call.bind(String.prototype.toUpperCase), // returns an upper-case version of the value passed to the first argument
 
 
-	unequal: function(v) {// returns true if the argument does exactly equal this
+	unequal: function(v) { // returns true if the argument does exactly equal this
 		return v !== this;
 	},
 
@@ -1083,16 +1127,20 @@ var F = {
 
 
 	union: function(r) { // Computes the list of values that are the intersection of all the arrays. Each value in the result is present in each of the arrays.
-		return r.concat(this).filter(function(a,b,c){return c.indexOf(a)===b;});
+		return r.concat(this).filter(function(a, b, c) {
+			return c.indexOf(a) === b;
+		});
 	},
 
-	unmethod: function(o, s){ // given an object and a method name,  returns that method bound to the object
+	unmethod: function(o, s) { // given an object and a method name,  returns that method bound to the object
 		return o[s].bind(o);
 	},
-	
-	
+
+
 	values: function(o) { // returns an array of values from an object given as the first argument
-		return Object.keys(o).map(function(k){return this[k]},o);
+		return Object.keys(o).map(function(k) {
+			return this[k]
+		}, o);
 	},
 
 
@@ -1107,20 +1155,15 @@ var F = {
 		return this.indexOf(v) === -1;
 	},
 
-	words: function(s) {// returns an array of all the words in a string version of the first argument
-		return String.prototype.match.call(s, /\b\w+\b/g)||[];
+	words: function(s) { // returns an array of all the words in a string version of the first argument
+		return String.prototype.match.call(s, /\b\w+\b/g) || [];
 	},
-	
-	
+
+
 	zip: function(v, i) { // create a new array of the argument and this at the slot given by the 2nd argument
 		return [v, this[i]];
 	}
 };
-
-
-
-
-
 
 
 
