@@ -14,6 +14,7 @@ mofun.js compliments shortcomings in other-wise great libraries like Prototype.j
 
 
 Examples
+---------------
 **Render many objects with one template**  
 `[{a:1, b:2}, {a:11, b:22}, {a:111, b:222}] .map(F.template, "val: {{a}}")`
 
