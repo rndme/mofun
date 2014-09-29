@@ -27,6 +27,7 @@ https://github.com/sstephenson/prototype/tree/master/src/prototype
 	
 ----------
 inspiration was found from
+http://danml.com/pub/lib/f.htm
 http://blog.osteele.com/posts/2007/07/functional-javascript/ (cool back in the day)
 http://osteele.com/sources/javascript/functional/
 http://fungusjs.com/  (cool in the future)
@@ -110,13 +111,33 @@ var F = {
 		return r;
 	},
 
+	appendProperty: function(o) { // given a [key,value] array as this, appends that value to an existing property on the first argument
+		o[this[0]] += this[1];
+		return o;
+	},
+
 	argument: function() { // returns the argument slot specified by a numerical this value.
 		return arguments[this];
 	},
 
-	appendProperty: function(o) { // given a [key,value] array as this, appends that value to an existing property on the first argument
-		o[this[0]] += this[1];
-		return o;
+	assert: function(v, s) { // if given a string, evaluates that string and returns a boolean or the 2nd argument on false and if specified
+		if(!v) return s || false;
+		if(v===true) return v;
+		try{ 
+			return (0||eval)(v) || s || v || false; 
+		}catch(y){ 
+			return (y+":  "+(s||v));
+		}
+	},
+	
+	assert2: function(v, s) { // if given a string, evaluates that string and returns a boolean or the 2nd argument on false and if specified
+		var x;
+		if(typeof v==="string"){
+			try{ x=(0||eval)(v); }catch(y){ x= y+"\t"+v; }
+		}else{
+			x= !!v || s;
+		}
+		return x || s || v;
 	},
 
 	assign: function(o, s) { // returns a function that assigns it's received first argument to the object and property specified
@@ -220,6 +241,16 @@ var F = {
 		return "data:" + (this == ("" + this) ? this : "text/plain") + "," + encodeURIComponent("" + s);
 	},
 	
+	date: function(v){ // a more versatile version of Date - can call/apply it with parts to make a new date
+		if(!v) return new Date();
+		if(v.join){ return new Date(+v[0]||0,+v[1]||0,+v[2]||0,+v[3]||0,+v[4]||0,+v[5]||0); }
+		return new Date(v);
+	},
+	
+	dateParts: function(v){ // given a date, returns an array of parts like [y,m,d,h,m,s,ms]
+		return new Date( new Date(v) - (new Date().getTimezoneOffset() * 60000)).toUTCString().split(/\W+/).map(Number);
+	},
+	
 	delProperty: function(o) { // delete a property of the first argument named by this. faster than F.censor for removing a single property
 		delete o[this];
 		return o;
@@ -249,8 +280,18 @@ var F = {
 		return n;
 	},
 
+	defaults: function(o) { // given an object this, fills missing key:value pairs on an object in the first argument
+		Object.keys(this).forEach(function(k){var u;if(u===o[k]) o[k]=this[k]; }, this);
+		return o;
+	},
+	
 	defer: setTimeout, // given a function, waits the #of ms specified by the 2nd argument to execute the function
 
+	define: function(s,v){ // defined a named property on this named by the first argument and set by the 2nd
+		this[s]=v;
+		return this;
+	},
+	
 	defined: function(v) { // returns true if the argument is not undefined or null
 		return v != null;
 	},
@@ -333,6 +374,14 @@ var F = {
 		return this.apply ? this.apply(v, arguments) : this;
 	},
 
+	findIndex: [].findIndex ? Function.call.bind([].findIndex) : function(r,f,o){var i=0;r.some(function(){i++; return f.apply(this,arguments); }, o||this);return i;}, // returns the index of the first element in an array given to the 1st argument that returns true when called like [].map to the function given to the 2nd argument
+	
+	findIndices: function(r,f,o){// returns the indices of elements in array given to 1st argument that return true when called like [].map to the function given to the 2nd argument
+		var c=[];
+		r.forEach(function(a,b){var x=f.apply(this,arguments); if(x)c.push(b);}, o||this);
+	  return c;
+	},
+	
 	first: function(sr) { // returns the first value of the first argument, be it a string or array (not ie7 compat)
 		return sr.slice(0, 1)[0]
 	},
@@ -386,6 +435,10 @@ var F = {
 		return [].hasOwnProperty.call(this, s);
 	},
 
+	head: function(sr) { // returns the first value(s) of the first argument. Pass an index to return the values of the array before that index.
+		return sr.slice(0, +this||1);
+	},
+	
 	inc: function(n) { // increments a numerical argument by one or by a number specified by this
 		n += +this || 1;
 		return n;
@@ -403,9 +456,7 @@ var F = {
 		return v[this]();
 	},
 
-	is: Object.is || function(v, v2) {
-		return v === v2 || (isNaN(v) && isNaN(v2));
-	}, // returns true if the first argument is the same as the 2nd
+	is:  Object.is || function(v, v2) {return v === v2 || (isNaN(v) && isNaN(v2));}, // returns true if the first argument is the same as the 2nd
 
 	isArray: Array.isArray.bind(Array), // returns true if the argument is an array
 
@@ -421,6 +472,10 @@ var F = {
 		return v != null;
 	},
 
+	isFalse: function(v){ // returns true if the first argument is falsy, false if it is truish.
+		return !v;
+	},
+	
 	isTrue: Boolean, // returns true if the argument is not "",0,false,undefined,null,or NaN
 
 	isType: function(v) { // returns true if the argument is of the type specified by this
@@ -487,6 +542,9 @@ var F = {
 		return v && v.constructor === RegExp;
 	},
 
+	isSet: function(v) { // returns true if value given to first argument is set and is not null
+		return v!=null;
+	},
 
 	isUndefined: function(v) { // returns true if the argument is exactly undefined
 		var u;
@@ -514,6 +572,11 @@ var F = {
 	less: function(n, n2) { // returns the smaller of two (and only two) numerical values. (Math.min accepts unlimited arguments)
 		return Math.min(n, n2);
 	},
+	
+	log: function(v){ // prints the first argument to the console and returns the first argument. safe to call even if no console in host
+		if(typeof console!=="undefined") console.log(v);
+		return v;
+	},
 
 	lt: function(v) { // returns true if the argument is less than this
 		return v < this;
@@ -521,6 +584,12 @@ var F = {
 
 	lte: function(v) { // returns true if the argument is less than or equal to this
 		return v <= this;
+	},
+
+	lut: function(r){ // given an array first argument, returns a Look Up Table for the array to allow fast index lookup by array element value
+		var o={},i=-1,m=r.length;
+		for(;++i<m;)o[r[i]]=i;
+	  return o;
 	},
 
 	match: function(sr) { // returns true if the argument contains a match of a value given as this
@@ -639,6 +708,10 @@ var F = {
 		return v != null;
 	},
 
+	ord: function(s){ // returns the ascii value of the first character of a string first argument 
+		return (""+s).charCodeAt(0);
+	},
+	
 	pairMap: function(r) { // applies a function specified by this to an array by the first argument
 		return this.apply(r[0], r);
 	},
@@ -697,6 +770,34 @@ var F = {
 
 	properties: Object.getOwnPropertyNames, // returns an array of all own property names in an object 
 
+	propIsEquiv: function(o){ // returns true if an object given to the first argument contains a property named by this[0] that is == this[1]
+		return o[this[0]]==this[1];
+	},
+
+	propIs: function(o){ // returns true if an object given to the first argument contains a property named by this[0] that is === this[1]
+		return o[this[0]]===this[1];
+	},
+
+	propIsIn: function(o){ // returns true if an object given to the first argument contains a property named by this[0] that is === to a element in an array from this[1]
+		return this[1].indexOf(o[this[0]])>-1;
+	},
+
+	propIsNot: function(o){ // returns true if an object given to the first argument contains a property named by this[0] that is not === this[1]
+		return o[this[0]]!==this[1];
+	},
+	
+	propIsNotEquiv: function(o){ // returns true if an object given to the first argument contains a property named by this[0] that is not == this[1]
+		return o[this[0]]!=this[1];
+	},
+
+	propIsLess: function(o){ // returns true if an object given to the first argument contains a property named by this[0] that is less than this[1]
+		return o[this[0]] < this[1];
+	},
+
+	propIsMore: function(o){ // returns true if an object given to the first argument contains a property named by this[0] that is greater than this[1]
+		return o[this[0]] > this[1];
+	},
+		
 	quote: function(s) { // escapes nested quotes and restricted white-space and wraps quotes around a stringy first argument to form a valid JS string literal
 		return JSON.stringify("" + s).replace(/\\t/g, "	");
 	},
@@ -706,6 +807,12 @@ var F = {
 	},
 
 	random: Math.random, // returns a random number between zero and one
+
+	randomString: function(n){ // given a length as the first argument, returns a string of random wordy chars.
+		var s="", m=+n||16;
+		while(s.length<m)s+=(1/Math.random()).toString(36).slice(3,-1).replace(/\W+/g, "").replace(/^\d+/,"");
+		return s.slice(0, m);
+	},
 
 	regexp: RegExp.prototype.test, // used with [].filter to match array elements with a regular expression
 
@@ -805,9 +912,17 @@ var F = {
 	},
 
 	size: function(sr) { // returns the length of the first argument or zero non non-lengthy things
-		return (sr && sr.length) || 0;
+		if(!sr || sr===true) return 0;
+		if( sr.length-.1 ) return sr.length;
+		return Object.keys(sr).length; 
 	},
 
+	skipWhile: function(r, f, o){ // given an array 1st argument, skips elements until the function of the 2nd argument returns false (called as [].map) then returns rest
+		var i=0;
+		r.every(function(){i++; return f.apply(this,arguments); }, o||this);
+		return r.slice(Math.max(0,i-1));
+	},
+	
 	slice: function(n) { // returns the first # of items from a string or array argument, specified by a numerical this value
 		return [].slice.call(n, + this || 0);
 	},
@@ -858,6 +973,10 @@ var F = {
 		return (s + "").split(/<\/?[^>]+?>/).join("");
 	},
 
+	substr: function(sr) { // return part of a string (or array) based on [start, [end]] array given to this
+		return sr.slice(this[0]||0, this[1]||9e9);
+	},
+	
 	subtract: function(n) { // subtracts this from a numerical first argument. 
 		return n - this;
 	},
@@ -888,10 +1007,16 @@ var F = {
 		return "<" + this + ">" + s + "</" + this + ">";
 	},
 
-	tail: function(sr) { // returns the rest of the values of the first argument. Pass an index to return the values of the array from that index onward.
-		return sr.slice(-1 * this);
+	tail: function(sr) { // returns the last value(s) of the first argument. Pass an index to return the values of the array from that index onward.
+		return sr.slice(-1 * (+this||9e9));
 	},
 
+	takeWhile: function(r, f, o){ // given an array 1st argument, returns elements until the function of the 2nd argument returns false (called as [].map)
+		var i=0;
+		r.every(function(){i++; return f.apply(this,arguments); }, o||this);
+		return r.slice(0, Math.max(0,i-1));
+	},
+	
 	template: function(o) {
 		return ("" + this).replace(/{{([^}]+)}}/g, function(j, a) {
 			return o[a];
@@ -913,14 +1038,18 @@ var F = {
 	},
 
 	thisAt: function(s) { // given a key, returns this at the key
-		return function() {
-			return this[s];
-		};
+		return this[s];
 	},
 
 	thisOverA: function(n) { // returns this over the first argument (division)
 		return this / n;
 	},
+
+	time: function(v){ // given a date (or nothing for the current time) as the first argument, returns the time portion of the date in local format
+		return new Date(v||+new Date()).toLocaleTimeString()
+	},
+	
+	timer: 	typeof performance !== "undefined" ? performance.now.bind(performance) : Date.now , // returns a time in ms 
 
 	times: function(n) { // multiplies the first argument by a numerical this value 
 		return n * this;
