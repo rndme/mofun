@@ -62,7 +62,8 @@ http://fungusjs.com/  (cool in the future)
 var F = {
 
 	$: function(css, root) { // returns an array of elements matching the CSS selector given to the first argument. the 2nd arg (optional) spcifies a root node to look under.
-		root = root || document.documentElement;
+		if(typeof document==="undefined") return [];
+		root = root || document.documentElement; /* (the ONLY browser-specific method) */
 		return [].slice.call(root.querySelectorAll(css));
 	},
 
@@ -73,6 +74,18 @@ var F = {
 	$c: function(s) { // Splits a string into an Array, treating commas as delimiters. 
 		return ("" + s).trim().split(",");
 	},
+
+	EE: function() { // returns a tiny EventEmitter
+		var E={};
+		return function(k, v, del) {
+			var r=E[k] || (E[k]=[]);
+			return typeof v != "function" ? 
+				r.some(function(f){return f.call(r,v,k)===false;}) : 
+				del===true ? 
+					r.splice(r.indexOf(v), 1) : 
+					r.unshift(v);
+		};
+	}, 
 
 	If: function(s) { // a quick and dirty filter maker from a string expression
 		return Function("a,b,c", "return  " + s + "?a:undefined");
@@ -146,6 +159,10 @@ var F = {
 		};
 	},
 
+	at: function(o){ // given an object first argument, and a index specified as a number or array of numbers as this, returns an array of values at each index
+	  return [].concat(this).map(function(k){return this[k]},o);
+	},
+	
 	avg: function(v, i, r) { // returns the value divided by the number of items in the third argument; a running average. usage: [1,2,3].map(F.avg, [0]).pop().
 		return this[0] += v / r.length, this[0];
 	},
@@ -223,6 +240,10 @@ var F = {
 		return sr.concat(sr2);
 	},
 
+	constant: function(v){ // returns a function that returns a value given by the first argument
+		return v.valueOf.bind(v);
+	},
+	
 	contains: function(sr) { // returns true if the argument contains the value specified by this as one of it's accessor properties
 		return sr.indexOf(this) > -1;
 	},
@@ -232,6 +253,8 @@ var F = {
 		o[v] = o[v] ? (o[v] + 1) : 1;
 		return o;
 	},
+
+	create: Object.create || function(o){ function f(){} f.prototype=p; return new f;}, // returns a new Object that inherits from the object passed as the first argument
 
 	dasherize: function(s) { // converts a stringy first argument from camelCaseFormat to separated-by-dashes-format
 		return (s + '').replace(/([a-z\d])([A-Z])/g, '$1-$2').toLowerCase();
@@ -308,6 +331,8 @@ var F = {
 		return n / this;
 	},
 
+	each: Function.call.bind([].forEach), // given an array as the first argument and a function as the 2nd, execute the function on each element in the array.
+	
 	endsWith: function(s) { // returns true if the argument ends with this
 		return s.lastIndexOf(this) + this.length === s.length;
 	},
@@ -345,7 +370,7 @@ var F = {
 	},
 
 	extract: function(o) { // returns a property named by this from the object passed to the first argument. alias for F.pluck.
-		return o[this];
+		return o[""+this];
 	},
 
 	extractThis: function(k) { // returns a property named by the first argument from the object passed to this.
@@ -508,6 +533,10 @@ var F = {
 
 	isNaN: isNaN, // returns true if the argument is NaN (an invalid number from a math operation)
 
+	isNative: function(f){
+		return typeof f==="function" && Function.toString.call(f).indexOf("[native code]")>-1;
+	},
+
 	isNeg: function(n) { // returns true if the argument is less than zero
 		return n < 0;
 	},
@@ -561,6 +590,10 @@ var F = {
 
 	last: function(sr) { // returns the last value of the first argument, be it a string or array.
 		return sr.slice(-1)[0];
+	},
+
+	later: function() { // returns a new Promise set to resolve when the stack clears.
+		return new Promise(setTimeout);
 	},
 
 	lcase: Function.call.bind(String.prototype.toLowerCase), // returns a lower-case version of the value passed to the first argument
@@ -651,7 +684,8 @@ var F = {
 		return v != this;
 	},
 
-
+	now: Date.now, // returns the current time in ms since 1970
+	
 	notNull: function(v) { // returns true for anything besides null or undefined.
 		return v != null;
 	},
@@ -744,7 +778,7 @@ var F = {
 	},
 
 	pluck: function(o) { // returns a property named by this from the object passed to the first argument. alias for F.extract
-		return o[this];
+		return o[""+this];
 	},
 
 	populate: function(r) { // fills an array with value of this or calling this (if function) against the arguments
@@ -766,6 +800,10 @@ var F = {
 
 	pretty: function(v) { // pretty-prints a JS Object or Array using JSON
 		return JSON.stringify(v, null, "\t");
+	},
+	
+	property: function(k){ //returns a function that returns a property named by the first argument on an object passed to it's first argument
+		return function(o){return o[k];};
 	},
 
 	properties: Object.getOwnPropertyNames, // returns an array of all own property names in an object 
@@ -845,6 +883,11 @@ var F = {
 		}, o);
 	},
 
+	result: function(o,s){ // given a function, returns the result of calling the function, otherwise returns the first argument
+		if(!s){ s=o; o=this; }
+		return typeof o[s] === "function" ? o[s].call(o) : o[s];
+	},
+	
 	reverse: function(s) { // reverses accessor property order on a stringy or array-y first argument
 		return [].slice.call(s).reverse()[typeof s === "string" ? "join" : "valueOf"]("");
 	},
@@ -1036,6 +1079,11 @@ var F = {
 			return f.call(v, this);
 		}
 	},
+	
+	tee: function(a){ // runs a function specified by this on the first argument and returns the first argument
+		this(a);
+		return a
+	},
 
 	thisAt: function(s) { // given a key, returns this at the key
 		return this[s];
@@ -1101,6 +1149,11 @@ var F = {
 		return r.lastIndexOf(v) == i;
 	},
 
+	uniqueId: function uniqueId(s){ // returns a unique string, with an optional prefix passed to the first argument
+		uniqueId.id=uniqueId.id||0;
+		return (prefix||"")+uniqueId.id++;
+	},
+	
 	union: function(r) { // Computes the list of values that are the intersection of all the arrays. Each value in the result is present in each of the arrays.
 		return r.concat(this).filter(function(a, b, c) {
 			return c.indexOf(a) === b;
@@ -1111,6 +1164,13 @@ var F = {
 		return o[s].bind(o);
 	},
 
+	uuid: function(){ // returns a UUID string
+		return [8,4,4,4,12]
+		.map(function(a){return ("abcde"+(1/Math.random()).toString(16)).slice(-1*a); })
+		.join("-")
+		.replace(/(.{14})./,"$14");
+	},
+	
 	values: function(o) { // returns an array of values from an object given as the first argument
 		return Object.keys(o).map(function(k) {
 			return this[k]
