@@ -1,4 +1,4 @@
-/*	mofun.js v2014.9.29  
+/*	mofun.js v2014.10.1   
 	http://danml.com/mofun
 	(c) 2014 dandavis
 	mofun may be freely distributed under the MIT license as is, or under [CCBY2.0]@dandavis when code comments are stripped (aka minified/uglifies/closured)
