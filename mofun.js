@@ -1,4 +1,4 @@
-/*	mofun.js v2014.9.28 
+/*	mofun.js v2014.9.29  
 	http://danml.com/mofun
 	(c) 2014 dandavis
 	mofun may be freely distributed under the MIT license as is, or under [CCBY2.0]@dandavis when code comments are stripped (aka minified/uglifies/closured)
@@ -388,8 +388,11 @@ var F= {
 		return o2;
 	},
 
-	f: function f(s) { // a quick and dirty function maker from a string of code. must be a single expression (use comma continuation if needed)
-		return f["CACHE_"+s] || (f["CACHE_"+s]=Function("a,b,c,d", "return " + s)) ;
+	f: function f(s, n) { // a quick and dirty function maker from a string of code. must be a single expression (use comma continuation if needed)
+		return f["CACHE_"+s+n] || (f["CACHE_"+s+n]=Function(  // make a new function:
+			"a,b,c,d,e,f,g,h,i".split(",").slice(0, (typeof n==="number")? n : 3) , //determine arity, defaulting to 3 for map/filter arity
+			(s.indexOf("return")>-1?"":"return ") + s+";")
+		); 
 	},
 
 	fill: function(v) { // returns value of this or calling this (if function) against the arguments
@@ -402,7 +405,7 @@ var F= {
 			i= 0,
 			x;
 			
-		if(f.split) f= filter[0+f] || (filter[0+f]=Function("a,b,c","return "+ f)) ;
+		if(f.split) f= filter[0+f] || (filter[0+f]=Function("a,b,c","return "+ f+";")) ;
 		
 		if(v==null){
 			for (; i<m; i++) if(x=f(r[i],i,r)) o[o.length]=r[i];
@@ -552,7 +555,7 @@ var F= {
 	isNaN: isNaN, // returns true if the argument is NaN (an invalid number from a math operation)
 
 	isNative: function(f){
-		return typeof f==="function" && Function.toString.call(f).indexOf("[native code]")>-1;
+		return typeof f==="function" && Function.toString.call(f).indexOf("[nat"+"ive code]")>-1;
 	},
 
 	isNeg: function(n) { // returns true if the argument is less than zero
@@ -657,8 +660,32 @@ var F= {
 		}
 		return o;
 	},
+  	
+	mapPure: function mapPure(r, f, v) { // BETA! like F.map except: needs pure functions (no closures), runs WAY faster, and moves this into a 4th argument
+		var m= r.length,
+			o= Array(m),
+			c= ""+f,
+			i= 0; 
+			
+		
+		if(f.split) f= map[0+f] || (map[0+f]=Function("a,b,c,d","return "+ f)) ;
+		
+		/* catch existing user-land functions and re-rewrite them to new anons that run faster:*/
+		if(c.length!=4 &&c.indexOf("na"+"tive code")===-1){ /* no atives or bound functions please. weak smoking gun here. */
+			if(mapPure[0+f]){
+				f=mapPure[0+f];
+			}else{
+				var args=c.split(/[)(]/)[1].trim().split(/\s*,\s*/).filter(Boolean).concat("_","__","___").slice(0,3).join(",")+",that";
+				var bod=c.split("{").slice(1).join("{").trim().slice(0,-1).trim().replace(/\bthis\b/g,"that"); /* yeah, it can clash with strings, careful! */
+				f=mapPure[0+f]=Function(args, bod);
+			}
+		}
+		
+		for (; i<m; i++) o[i]= f(r[i],i,r,v);
+		return o;
+	},
   
-  
+   
   
 	match: function(sr,_,__) { // returns true if the argument contains a match of a value given as this
 		return sr.indexOf(this) !== -1;
@@ -679,7 +706,7 @@ var F= {
 
 	methods: function(e, t, n) { // calls a method on the first argument given by an array as this: ["methodName", ["call1arg1","call2arg1","call3arg1"...]]
 		var k = this.shift();
-		return this.pop().map(function(a) {
+		return this.pop().map(function(a,_,__) {
 			return e[k].call(e, a);
 		});
 	},
@@ -794,7 +821,7 @@ var F= {
 
 	partition: function(arr, fnDecide) { // splits a collection into two arrays: one whose elements all satisfy the given predicate, and one whose elements all do not satisfy the predicate.
 		var oks = arr.filter(fnDecide),
-			bads = arr.filter(function(e) {
+			bads = arr.filter(function(e,_,__) {
 				return this.indexOf(e) === -1;
 			}, oks);
 		return [oks, bads];
@@ -1109,24 +1136,17 @@ var F= {
 		return r.slice(0, Math.max(0,i-1));
 	},
 	
-	template: function(o,_,__) { // given a string this and an object first argument, injects own property of that object into that string via {{key}} placeholders
-		return ("" + this).replace(/{{([^}]+)}}/g, function(j, a,_,__) {
-			return o[a];
-		});
-	},
-	
-	template2: function(o, _, __) { // (beta) given a string this and an object first argument, injects own property of that object into that string via {{key}} placeholders
-		var r = ("" + this).split("{{"),
-			s = "";
-		for (var i = 0, m = r.length; i < m; i++) {
+	template: function(o, _, __) { // given a string this and an object first argument, injects own property of that object into that string via {{key}} placeholders
+		var r= ("" + this).split("{{"),
+			s= "";
+		for (var i= 0, m= r.length; i < m; i++) {
 			var p = r[i].split("}}");
 			s += i ? (o[p[0]] + p[1]) : r[i];
 		}
 		return s;
 	},
 
-
-	that: function() { // returns this, like F.fill() without the dynamic capability of accepting functions.
+	that: function(_,__,___) { // returns this, like F.fill() without the dynamic capability of accepting functions.
 		return this;
 	},
 
@@ -1171,7 +1191,7 @@ var F= {
 		}
 	},
 
-	toFixed: function(n) { // limits the decimal places of a numerical first argument by this # of spaces, defaults to 2 if this is non-numeric
+	toFixed: function(n,_,__) { // limits the decimal places of a numerical first argument by this # of spaces, defaults to 2 if this is non-numeric
 		return ((1 * n) || 0).toFixed(+this || 2);
 	},
 
@@ -1226,7 +1246,7 @@ var F= {
 
 	uuid: function(){ // returns a UUID string
 		return [8,4,4,4,12]
-		.map(function(a){return ("abcde"+(1/Math.random()).toString(16)).slice(-1*a); })
+		.map(function(a,_,__){return ("abcde"+(1/Math.random()).toString(16)).slice(-1*a); })
 		.join("-")
 		.replace(/(.{14})./,"$14");
 	},
