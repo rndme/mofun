@@ -1,15 +1,12 @@
 /*	mofun.js v2014.10.1   
-	http://danml.com/mofun
+	http://danml.com/mofun/
 	(c) 2014 dandavis
 	mofun may be freely distributed under the MIT license as is, or under [CCBY2.0]@dandavis when code comments are stripped (aka minified/uglifies/closured)
 
-Contains many standalone functional programming helps, function composers, comparators, sorters, filters, common transforms, and more.
-Since functional Array methods landed in Firefox 1.5, all we need is a map+reduce+filter and a "few" small helpers, my collection of which is  mofun.js
+Contains many standalone functional programming helpers, function composers, comparators, sorters, filters, common transforms, and much more.
 
- 
 ----------
-some comments/documentation/ideas (but no code) taken from the following great projects:
-
+a few code comments were taken from the following great projects:
 
 https://raw.githubusercontent.com/jashkenas/underscore/master/underscore.js
 	Underscore.js 1.7.0
@@ -17,35 +14,27 @@ https://raw.githubusercontent.com/jashkenas/underscore/master/underscore.js
 	(c) 2009-2014 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
 	Underscore may be freely distributed under the MIT license.
 
-
 https://github.com/sstephenson/prototype/tree/master/src/prototype
 	Prototype JavaScript framework
 	(c) 2005-2010 Sam Stephenson
 	Prototype is freely distributable under the terms of an MIT-style license.
 	For details, see the Prototype web site: http://www.prototypejs.org/
 
-	
 ----------
-inspiration was found from
+inspiration found from:
 http://danml.com/pub/lib/f.htm
 http://blog.osteele.com/posts/2007/07/functional-javascript/ (cool back in the day)
 http://osteele.com/sources/javascript/functional/
 http://fungusjs.com/  (cool in the future)
-
-
- 
-
- code notes:
-- there is a small amount repetition in the methods, ex "[].slice.call" instead of "F._" to avoid any and all inner-dependences. each method is an island.
-- "Array.prototype.slice" is than "[].slice", and [].slice is shorter, so it's used, (""+v), (+v), [].hasOwnProperty,"".toUpperCase, etc: same deal
+----------
+code notes:
+- there is some repetition in the methods to avoid any inner-dependences. each method is an island.
 - this need not be an object, and in the context of [].map/filter/forEach/etc, the value will be converted to an object.
-	that might sound like a problem, BUT:
-		the value's toString() will remain the same, so it's a good indexer x[this]
-		Number's valueOf() does not change, other than this being "immutable" (no this++) in such contexts  (1/this is fine) 
-		functions work fine (this() is ok)
-		Arrays and Objects and RegExps and Dates are passed to this as-is, so this.test(), this.getTime, this.slice(), etc are ok
-		an intrinsic primitive-to-native-object upgrade is not computationally expensive in modern engines, and saving the other-wise requisite anon offsets any costs 
-- avoiding an anon function wrapper in code below reduces the work each method of F does (one fewer closure), avoids the need to sniff the global, and works everywhere.
+		the value's toString() will remain the same, so it's a good indexer: x[this]
+		Number's valueOf() does not change, so 1/this is fine
+		functions work fine: this(a) is ok
+		Arrays and Objects and RegExps and Dates are passed via this as-is, so this.test(), this.getTime, this.slice(), etc are ok
+
 - formal parameters suggest an argument type using the following convention:
 	s a String
 	r an Array
@@ -55,12 +44,10 @@ http://fungusjs.com/  (cool in the future)
 	v a value (could be anything)
 	sr a String or Array
 
-
-
 */
 
 
-var F= {
+var F= { // the main attraction, F contains everything in mofun.
 
 	$: function(css, root) { // returns an array of elements matching the CSS selector given to the first argument. the 2nd arg (optional) spcifies a root node to look under.
 		if(typeof document==="undefined") return [];
