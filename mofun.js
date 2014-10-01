@@ -413,6 +413,13 @@ var F= { // the main attraction, F contains everything in mofun.
 	  return c;
 	},
 	
+	finnally: function(f,v){ // given a function 1st arg, returns a new function that transforms the return via translation object or function 2nd arg
+		if(typeof v==="function"){
+			return function(a,b,c){return v.call(this, f.apply(this, arguments)) ;}
+		}
+		return function(a,b,c){return v[f.apply(this, arguments)] ;}
+	},
+	
 	first: function(sr) { // returns the first value of the first argument, be it a string or array (not ie7 compat)
 		return sr.slice(0, 1)[0]
 	},
@@ -648,22 +655,23 @@ var F= { // the main attraction, F contains everything in mofun.
 		return o;
 	},
   	
-	mapPure: function mapPure(r, f, v) { // BETA! like F.map except: needs pure functions (no closures), runs WAY faster, and moves this into a 4th argument
+	mapPure: function mapPure(r, f, v) { // like F.map except: needs pure functions (no closures) and rewrites code via RegExp. Why? Unbeatable Performance with F's this-using methods
 		var m= r.length,
 			o= Array(m),
-			c= ""+f,
-			i= 0; 
-			
+			c,
+			i= 0; 			
 		
-		if(f.split) f= map[0+f] || (map[0+f]=Function("a,b,c,d","return "+ f)) ;
+		if(f.split) f= mapPure[0+f] || (mapPure[0+f]=Function("a,b,c,d","return "+ f)) ;
 		
+		 c=""+f;
+		 
 		/* catch existing user-land functions and re-rewrite them to new anons that run faster:*/
-		if(c.length!=4 &&c.indexOf("na"+"tive code")===-1){ /* no atives or bound functions please. weak smoking gun here. */
+		if(c.length!=4 &&c.indexOf("na"+"tive code")===-1){ /* no natives or bound functions please.  */
 			if(mapPure[0+f]){
 				f=mapPure[0+f];
 			}else{
 				var args=c.split(/[)(]/)[1].trim().split(/\s*,\s*/).filter(Boolean).concat("_","__","___").slice(0,3).join(",")+",that";
-				var bod=c.split("{").slice(1).join("{").trim().slice(0,-1).trim().replace(/\bthis\b/g,"that"); /* yeah, it can clash with strings, careful! */
+				var bod=c.split("{").slice(1).join("{").trim().slice(0,-1).trim().replace(/\bthis\b/g,"that"); /* can clash, but works w/ F methods */
 				f=mapPure[0+f]=Function(args, bod);
 			}
 		}
@@ -673,6 +681,41 @@ var F= { // the main attraction, F contains everything in mofun.
 	},
   
    
+ 	mapPure2: function mapPure2(r, f, v) { // BETA like F.map except: needs pure functions (no closures) and completely rewrites code into a for-loop-based anon
+		var m= r.length,
+			o= Array(m),
+			c,
+			i= 0; 			
+		
+		if(f.split) f= mapPure[0+f] || (mapPure[0+f]=Function("a,b,c,d","return "+ f)) ;
+		
+		 c=""+f;
+		 
+		/* catch existing user-land functions and re-rewrite them to new anons that run faster:*/
+		if( c.indexOf("na"+"tive code")===-1){ /* no natives or bound functions please.  */
+			if(mapPure2[0+f]){
+				f=mapPure2[0+f];
+			}else{
+				var args=(c.split(/[)(]/)[1].trim().split(/\s*,\s*/).filter(Boolean).concat("_","__","___").slice(0,3).join(",")+",that").split(",");
+				var bod=c.split("{").slice(1).join("{").trim().slice(0,-1).trim().replace(/\bthis\b/g,"that"); /* can clash, but works w/ F methods */
+				bod=bod.replace(/(\/\/[\w\W]+?)$/gm,"\n").replace("return","").trim();
+				
+				var head="var _r=Array("+args[2]+".length);"+args[1]+"=0;\n\tfor(var m_x="+args[2]+".length;"+args[1]+"<m_x;"+args[1]+"++){"+args[0]+"="+
+				args[2]+
+				"["+args[1]+"];\n\t\t_r["+args[1]+"]="+
+					bod+
+				";\n\t}";
+				f=mapPure2[0+f]=Function(args, head+";\n\treturn _r;")
+			}
+			
+			
+			
+		}
+				
+		return  f(null,null,r,v);
+		
+	},
+  
   
 	match: function(sr,_,__) { // returns true if the argument contains a match of a value given as this
 		return sr.indexOf(this) !== -1;
@@ -795,7 +838,7 @@ var F= { // the main attraction, F contains everything in mofun.
 		return (""+s).charCodeAt(0);
 	},
 	
-	pairMap: function(r) { // applies a function specified by this to an array by the first argument
+	pairMap: function(r,_,__) { // applies a function specified by this to an array by the first argument
 		return this.apply(r[0], r);
 	},
 
@@ -901,7 +944,18 @@ var F= { // the main attraction, F contains everything in mofun.
 		while(s.length<m)s+=(1/Math.random()).toString(36).slice(3,-1).replace(/\W+/g, "").replace(/^\d+/,"");
 		return s.slice(0, m);
 	},
-
+/*
+	reducePure: function reducePure(r, f){ // BETA - like F.reduce, but possibly faster. 
+		// needs heap management, batches of 1000 maybe, tune for different sizes
+		
+		var fn=reducePure[0+f], r2;
+		if(!fn){
+			r2=JSON.stringify(r.slice(1)).slice(1,-1).split(","), 
+			fn=Function("f", "return "+new Array(r.length).join("f(")+JSON.stringify(r[0])+","+r2.join("),")+")");
+		}
+		return fn(f);
+	},
+*/
 	reduce: function reduce(r, f, v) { // given an array as the first argument and a function as the 2nd,  perform a reduction on the array, left to right
 		var	m=r.length-1,
 			i=0,u;
@@ -921,6 +975,11 @@ var F= { // the main attraction, F contains everything in mofun.
 		return v!=null ? r.filter(o,v) : r.filter(o);
 	},
 
+	replace: function(s) { // given a string first argument and function or conversion object as this, replaces matches
+		var reps=this;
+		
+	},
+	
 	rest: function(e) { // returns the rest of the values of the first argument. Pass an index to return the values of the array from that index onward.
 		return e.slice(-1 * this);
 	},
@@ -1087,9 +1146,9 @@ var F= { // the main attraction, F contains everything in mofun.
 		return n - this;
 	},
 
-	subFilter: function(f, s) { //returns a new function that runs on a property of the argument specified by s instead of the arguments.
-		return function(v) {
-			return f.apply(this, v[s].concat([].slice.call(arguments,1)));
+	subMethod: function(f, s) { //given a 1st arg function, returns a new function that runs on a property of the element instead of the whole, specified by 2nd arg.
+		return function(v,_,__) {
+			return f.call(this, v[s], _, __);
 		}
 	},
 
@@ -1242,6 +1301,12 @@ var F= { // the main attraction, F contains everything in mofun.
 		return Object.keys(o).map(function(k,_,__) {
 			return this[k];
 		}, o);
+	},
+	
+	visit: function(o, f, c){ // given an object 2st argument and a function 2nd, runs the function on each property, like [].map(). optional this via 3rd arg
+		var r={},x
+		for(var it in o) if((x=f.call(c===undefined?o:c,o[it],it,o))!=null) r[it]=x ;
+		return r;
 	},
 
 	where: function(o,_,__) { // returns true for objects containing specific key:value pair defined by an object given as this
