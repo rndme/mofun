@@ -29,7 +29,7 @@ http://fungusjs.com/  (cool in the future)
 ----------
 code notes:
 - there is some repetition in the methods to avoid any inner-dependences. each method is an island.
-- this need not be an object, and in the context of [].map/filter/forEach/etc, the value will be converted to an object.
+- this need not be an object, and in the context of [].map/filter/forEach/etc, the value will be converted to an object unless in "use strict" mode.
 		the value's toString() will remain the same, so it's a good indexer: x[this]
 		Number's valueOf() does not change, so 1/this is fine
 		functions work fine: this(a) is ok
@@ -92,6 +92,7 @@ var F= { // the main attraction, F contains everything in mofun.
 	abs: Math.abs, // returns the absolute value of a numerical value given to the first argument
 
 	add: function(v,_,__) { // adds this onto the first argument. use F.sum() to add two arguments.
+		"use strict";
 		return v + this;
 	},
 
@@ -101,6 +102,7 @@ var F= { // the main attraction, F contains everything in mofun.
 	},
 
 	addNumber: function(n,_,__) { // adds this onto the first argument. coerces to Number to avoid accidental concatenation. 
+		"use strict";
 		return +n + +this;
 	},
 
@@ -122,6 +124,7 @@ var F= { // the main attraction, F contains everything in mofun.
 	},
 
 	argument: function() { // returns the argument slot specified by a numerical this value.
+		"use strict";
 		return arguments[this];
 	},
 
@@ -142,13 +145,15 @@ var F= { // the main attraction, F contains everything in mofun.
 	},
 
 	at: function(o,_,__){ // given an object first argument, and a index specified as a number or array of numbers as this, returns an array of values at each index
+		"use strict";
 	  return [].concat(this).map(function(k,_,__){return this[k]},o);
 	},
 	
-	avg: function(v, i, r) { // returns the value divided by the number of items in the third argument; a running average. usage: [1,2,3].map(F.avg, [0]).pop().
-		return this[0] += v / r.length, this[0];
+	avg: function(v, i, c, r) { // returns the numerical average of an array of numbers. [1,2,3].reduce(F.avg)
+		return r.length-1 === c ? 
+			(v + i) / r.length : 
+			v + i ;
 	},
-
 
 	b: function(a, b, c) { //returns the 2nd argument. good for making ranged integer list by capturing [].map()'s 2nd argument.
 		return b;
@@ -178,12 +183,11 @@ var F= { // the main attraction, F contains everything in mofun.
 
 	ceil: Math.ceil, // returns the closes integer furthest from zero from the number passed to the first argument
 
-	censor: function(r,_,__) { // given an object first argument and a string array this, returns the object without properties listed in the array.
-		this.forEach(function(k,_,__) {
-			delete this[k]
-		}, r);
-		return r;
+	censor: function(o,_,__) { // given an object first argument and a string array this, returns the object without properties listed in the array.
+		for(var i=0,m=this.length;i<m;i++)	delete o[this[i]];
+		return o;
 	},
+	
 
 	changed: function(v, i, r) { // used with [].filter, returns true if the current element is different than as the previous one. see also: F.repeated
 		return r[i - 1] !== v;
@@ -207,7 +211,7 @@ var F= { // the main attraction, F contains everything in mofun.
 		return o2;
 	},
 
-	compact: function(v) { // used with [].filter(), returns a copy of the array without any null or undefined values.
+	compact: function(v,_,__) { // used with [].filter(), returns a copy of the array without any null or undefined values.
 		return v != null;
 	},
 
@@ -243,6 +247,7 @@ var F= { // the main attraction, F contains everything in mofun.
 	},
 
 	dataURL: function(s) { // given a stringy first argument and an option string this to indicate mime type, returns a dataURL contain the first argument
+		"use strict";
 		return "data:" + (this == ("" + this) ? this : "text/plain") + "," + encodeURIComponent("" + s);
 	},
 	
@@ -281,6 +286,7 @@ var F= { // the main attraction, F contains everything in mofun.
 	},
 
 	dec: function(n,_,__) { // decrements a numerical argument by one or by a number specified by this
+		"use strict";
 		n -= +this || 1;
 		return n;
 	},
@@ -316,14 +322,17 @@ var F= { // the main attraction, F contains everything in mofun.
 	each: Function.call.bind([].forEach), // given an array as the first argument and a function as the 2nd, execute the function on each element in the array.
 	
 	endsWith: function(s,_,__) { // returns true if the argument ends with this
+		"use strict";
 		return s.lastIndexOf(this) + this.length === s.length;
 	},
 
 	equal: function(v,_,__) { // returns true if the argument is exactly the same as a value given by this
+		"use strict";
 		return v === this;
 	},
 
 	equiv: function(v,_,__) { // returns true if the argument is loosely the same as a value given by this
+		"use strict";
 		return v == this;
 	},
 
@@ -375,7 +384,9 @@ var F= { // the main attraction, F contains everything in mofun.
 		return o2;
 	},
 
-	f: function f(s, n) { // a quick and dirty function maker from a string of code. must be a single expression (use comma continuation if needed)
+	f: function f(s, n) { // a quick function maker from a string of code passed as the first argument. prepends "return " is not present in first argument.
+		"use strict";
+		if(typeof f==="string") return f; // make harmless
 		return f["CACHE_"+s+n] || (f["CACHE_"+s+n]=Function(  // make a new function:
 			"a,b,c,d,e,f,g,h,i".split(",").slice(0, (typeof n==="number")? n : 3) , //determine arity, defaulting to 3 for map/filter arity
 			(s.indexOf("return")>-1?"":"return ") + s+";")
@@ -383,21 +394,22 @@ var F= { // the main attraction, F contains everything in mofun.
 	},
 
 	fill: function(v) { // returns value of this or calling this (if function) against the arguments
+		"use strict";
 		return this.apply ? this.apply(v, arguments) : this;
 	},
 
 	filter: function filter(r, f, v) { // like [].filter except: arg1+2 can be string, sparse arrays are visited, callback's 3rd arg is orig (not clone), faster.
+		"use strict";
 		var m= r.length,
 			o= [],
-			i= 0,
-			x;
+			i= 0;
 			
 		if(f.split) f= filter[0+f] || (filter[0+f]=Function("a,b,c","return "+ f+";")) ;
 		
 		if(v==null){
-			for (; i<m; i++) if(x=f(r[i],i,r)) o[o.length]=r[i];
+			for(; i<m; i++) if(f(r[i],i,r)) o.push(r[i]);
 		}else{
-			for (; i<m; i++) if(x=f.call(v,r[i],i,r)) o[o.length]=r[i];
+			for(; i<m; i++) if(f.call(v,r[i],i,r)) o.push(r[i]);
 		}
 		return o;
 	},
@@ -408,8 +420,9 @@ var F= { // the main attraction, F contains everything in mofun.
 	findIndex: [].findIndex ? Function.call.bind([].findIndex) : function(r,f,o){var i=0;r.some(function(){i++; return f.apply(this,arguments); }, o||this);return i;}, // returns the index of the first element in an array given to the 1st argument that returns true when called like [].map to the function given to the 2nd argument
 	
 	findIndices: function(r,f,o){// returns the indices of elements in array given to 1st argument that return true when called like [].map to the function given to the 2nd argument
-		var c=[];
-		r.forEach(function(a,b,_){var x=f.apply(this,arguments); if(x)c.push(b);}, o||this);
+		var c=[],u;
+		o=o===u?this:o;
+		r.forEach(function(a,b,_){var x=f.apply(o,arguments); if(x)c.push(b);});
 	  return c;
 	},
 	
@@ -440,10 +453,12 @@ var F= { // the main attraction, F contains everything in mofun.
 	},
 
 	gt: function(v,_,__) { // greater than value compare
+		"use strict";
 		return v > this;
 	},
 
 	gte: function(v,_,__) { // greater than or equals value compare	(use: )
+		"use strict";
 		return v >= this;
 	},
 
@@ -614,6 +629,7 @@ var F= { // the main attraction, F contains everything in mofun.
 	lcase: Function.call.bind(String.prototype.toLowerCase), // returns a lower-case version of the value passed to the first argument
 
 	left: function(sr,_,__) { // returns a slice from the left a numerical value given to this # of slots
+		"use strict";
 		return sr.slice(0, + this);
 	},
 
@@ -627,10 +643,12 @@ var F= { // the main attraction, F contains everything in mofun.
 	},
 
 	lt: function(v,_,__) { // returns true if the argument is less than this
+		"use strict";
 		return v < this;
 	},
 
 	lte: function(v,_,__) { // returns true if the argument is less than or equal to this
+		"use strict";
 		return v <= this;
 	},
 
@@ -641,6 +659,7 @@ var F= { // the main attraction, F contains everything in mofun.
 	},
 	
 	map: function map(r, f, v) { // like [].map except: arg1+2 can be string, sparse arrays are visited, callback's 3rd arg is orig (not clone), faster.
+		"use strict";
 		var m= r.length,
 			o= Array(m),
 			i= 0;
@@ -654,69 +673,7 @@ var F= { // the main attraction, F contains everything in mofun.
 		}
 		return o;
 	},
-  	
-	mapPure: function mapPure(r, f, v) { // like F.map except: needs pure functions (no closures) and rewrites code via RegExp. Why? Unbeatable Performance with F's this-using methods
-		var m= r.length,
-			o= Array(m),
-			c,
-			i= 0; 			
-		
-		if(f.split) f= mapPure[0+f] || (mapPure[0+f]=Function("a,b,c,d","return "+ f)) ;
-		
-		 c=""+f;
-		 
-		/* catch existing user-land functions and re-rewrite them to new anons that run faster:*/
-		if(c.length!=4 &&c.indexOf("na"+"tive code")===-1){ /* no natives or bound functions please.  */
-			if(mapPure[0+f]){
-				f=mapPure[0+f];
-			}else{
-				var args=c.split(/[)(]/)[1].trim().split(/\s*,\s*/).filter(Boolean).concat("_","__","___").slice(0,3).join(",")+",that";
-				var bod=c.split("{").slice(1).join("{").trim().slice(0,-1).trim().replace(/\bthis\b/g,"that"); /* can clash, but works w/ F methods */
-				f=mapPure[0+f]=Function(args, bod);
-			}
-		}
-		
-		for (; i<m; i++) o[i]= f(r[i],i,r,v);
-		return o;
-	},
-  
-   
- 	mapPure2: function mapPure2(r, f, v) { // BETA like F.map except: needs pure functions (no closures) and completely rewrites code into a for-loop-based anon
-		var m= r.length,
-			o= Array(m),
-			c,
-			i= 0; 			
-		
-		if(f.split) f= mapPure[0+f] || (mapPure[0+f]=Function("a,b,c,d","return "+ f)) ;
-		
-		 c=""+f;
-		 
-		/* catch existing user-land functions and re-rewrite them to new anons that run faster:*/
-		if( c.indexOf("na"+"tive code")===-1){ /* no natives or bound functions please.  */
-			if(mapPure2[0+f]){
-				f=mapPure2[0+f];
-			}else{
-				var args=(c.split(/[)(]/)[1].trim().split(/\s*,\s*/).filter(Boolean).concat("_","__","___").slice(0,3).join(",")+",that").split(",");
-				var bod=c.split("{").slice(1).join("{").trim().slice(0,-1).trim().replace(/\bthis\b/g,"that"); /* can clash, but works w/ F methods */
-				bod=bod.replace(/(\/\/[\w\W]+?)$/gm,"\n").replace("return","").trim();
-				
-				var head="var _r=Array("+args[2]+".length);"+args[1]+"=0;\n\tfor(var m_x="+args[2]+".length;"+args[1]+"<m_x;"+args[1]+"++){"+args[0]+"="+
-				args[2]+
-				"["+args[1]+"];\n\t\t_r["+args[1]+"]="+
-					bod+
-				";\n\t}";
-				f=mapPure2[0+f]=Function(args, head+";\n\treturn _r;")
-			}
-			
-			
-			
-		}
-				
-		return  f(null,null,r,v);
-		
-	},
-  
-  
+
 	match: function(sr,_,__) { // returns true if the argument contains a match of a value given as this
 		return sr.indexOf(this) !== -1;
 	},
@@ -744,6 +701,7 @@ var F= { // the main attraction, F contains everything in mofun.
 	min: Function.apply.bind(Math.min, Math), // returns the smallest value in an array given to the first argument. use Math.min to find the min of many arguments instead of an array.
 
 	mod: function(n,_,__) { // returns the division remainder (modulo) from dividing the first argument by this 
+		"use strict";
 		return n % this;
 	},
 
@@ -759,10 +717,12 @@ var F= { // the main attraction, F contains everything in mofun.
 	},
 
 	multiply: function(n,_,__) { // multiplies this by a numerical first argument. 
+		"use strict";
 		return n * this;
 	},
 
 	negate: function(f) { // returns a function from the first argument that returns the boolean opposite of what it used to
+		"use strict";
 		return function() {
 			return !f.apply(this, arguments);
 		}
@@ -773,6 +733,7 @@ var F= { // the main attraction, F contains everything in mofun.
 	},
 
 	not: function(v,_,__) { // a soft compare of the arguments and this
+		"use strict";
 		return v != this;
 	},
 
@@ -839,10 +800,12 @@ var F= { // the main attraction, F contains everything in mofun.
 	},
 	
 	pairMap: function(r,_,__) { // applies a function specified by this to an array by the first argument
+		"use strict";
 		return this.apply(r[0], r);
 	},
 
 	partial: function(fn) { // Partially apply a function in the first arguments by filling in any number of its arguments, without changing its dynamic this value. 
+		"use strict";
 		var args = [].slice.call(arguments, 1);
 		return function() {
 			return fn.apply(this, args.concat([].slice.call(arguments)));
@@ -852,28 +815,30 @@ var F= { // the main attraction, F contains everything in mofun.
 	partition: function(arr, fnDecide) { // splits a collection into two arrays: one whose elements all satisfy the given predicate, and one whose elements all do not satisfy the predicate.
 		var oks = arr.filter(fnDecide),
 			bads = arr.filter(function(e,_,__) {
-				return this.indexOf(e) === -1;
-			}, oks);
+				return oks.indexOf(e) === -1;
+			});
 		return [oks, bads];
 	},
 
 	percent: function(n,_,__) { // returns the first argument as a ratio to a numerical this value
+		"use strict";
 		return n / this;
 	},
 
 	pick: function(o,_,__) { // copies an object, filtered to only have values  white-listed by an array of valid keys. includes inherited properties (so it can use the DOM).
+		"use strict";
 		var temp = {};
-		this.forEach(function(k,_,__) {
-			if (this[k] !== undefined) temp[k] = this[k];
-		}, o);
+		for(var i=0,m=this.length;i<m;i++)	if ( o[this[i]] !== undefined) temp[this[i]] = o[this[i]] ;
 		return temp;
 	},
-
-	pluck: function(o,_,__) { // returns a property named by this from the object passed to the first argument. alias for F.extract
+	
+	pluck: function(o,_,__) { // returns a single property named by this from the object passed to the first argument. alias for F.extract
+		"use strict";
 		return o[""+this];
 	},
 
 	populate: function(r) { // fills an array with value of this or calling this (if function) against the arguments
+		"use strict";
 		for (var i = 0, m = r.length; i < m; i++) {
 			r[i] = this.apply ? this.apply(v, arguments) : this;
 		}
@@ -886,6 +851,7 @@ var F= { // the main attraction, F contains everything in mofun.
 	},
 
 	prepend: function(s,_,__) { // prepends this onto string passed as the first argument. like F.add, but backwards. has same effect on numbers as F.add
+		"use strict";
 		return this + s;
 	},
 
@@ -901,6 +867,7 @@ var F= { // the main attraction, F contains everything in mofun.
 	properties: Object.getOwnPropertyNames, // returns an array of all own property names in an object 
 
 	propIsEquiv: function(o,_,__){ // returns true if an object given to the first argument contains a property named by this[0] that is == this[1]
+		"use strict";
 		return o[this[0]]==this[1];
 	},
 
@@ -944,24 +911,14 @@ var F= { // the main attraction, F contains everything in mofun.
 		while(s.length<m)s+=(1/Math.random()).toString(36).slice(3,-1).replace(/\W+/g, "").replace(/^\d+/,"");
 		return s.slice(0, m);
 	},
-/*
-	reducePure: function reducePure(r, f){ // BETA - like F.reduce, but possibly faster. 
-		// needs heap management, batches of 1000 maybe, tune for different sizes
-		
-		var fn=reducePure[0+f], r2;
-		if(!fn){
-			r2=JSON.stringify(r.slice(1)).slice(1,-1).split(","), 
-			fn=Function("f", "return "+new Array(r.length).join("f(")+JSON.stringify(r[0])+","+r2.join("),")+")");
-		}
-		return fn(f);
-	},
-*/
+
 	reduce: function reduce(r, f, v) { // given an array as the first argument and a function as the 2nd,  perform a reduction on the array, left to right
+		"use strict";
 		var	m=r.length-1,
 			i=0,u;
 			if(v===u) v= r[i];
 			if(f.split) f= reduce[0+f]||(reduce[0+f]=Function("a,b,c,d","return "+f));
-		for(; i<m; i+=2) { // unroll X2 for large-array perf
+		for(; i<m; i+=2) { // unroll X2 for better large-array perf
 			v=f(v, r[i], i, r);
 			v=f(v, r[i+1], i+1, r);
 		}
@@ -971,11 +928,11 @@ var F= { // the main attraction, F contains everything in mofun.
 	regexp: RegExp.prototype.test, // used with [].filter to match array elements with a regular expression
 
 	reject: function(r,f,v) { // like [].filter(), but returns elements which invoke the callback to return falsy
-		function o(){return !f.apply(this, arguments);}
+		function o(a,b,c){return !f.apply(this, arguments);}
 		return v!=null ? r.filter(o,v) : r.filter(o);
 	},
 
-	replace: function(s) { // given a string first argument and function or conversion object as this, replaces matches
+	replaceAll: function(s) { // given a string first argument and function or conversion object as this, replaces matches
 		var reps=this;
 		
 	},
@@ -1004,6 +961,7 @@ var F= { // the main attraction, F contains everything in mofun.
 	},
 
 	result: function(o,s){ // given a function, returns the result of calling the function, otherwise returns the first argument
+		"use strict";
 		if(!s){ s=o; o=this; }
 		return typeof o[s] === "function" ? o[s].call(o) : o[s];
 	},
@@ -1013,23 +971,27 @@ var F= { // the main attraction, F contains everything in mofun.
 	},
 
 	right: function(sr,_,__) { // returns a slice from the right a numerical value given to this # of slots
+		"use strict";
 		return sr.slice(-1 * this);
 	},
 
 	round: Math.round, // returns an integer closest to the number passed to the first argument
 
 	rPartial: function(f) { // Partially apply a function in the first arguments, later filling in any number of the result's arguments. 
+		"use strict";
 		var args = [].slice.call(arguments, 1);
 		return function() {
 			return f.apply(this, [].slice.call(arguments).concat(args));
-		}
+		};
 	},
 
 	run: function(v,_,__) { // given a function as this, run the function passing the first argument
+		"use strict";
 		return this(v);
 	},
 
 	same: function(v,_,__) { // returns true if the argument is equivalent to this
+		"use strict";
 		return v == this;
 	},
 
@@ -1043,16 +1005,16 @@ var F= { // the main attraction, F contains everything in mofun.
 	selMatch: function(o,_,__) { // given an object first argument and a regexp this, returns a new object with only properties matched by the regexp
 		var o2 = o.constructor === Array ? [] : {};
 		Object.keys(o).filter(/./.test, this).forEach(function(k,_,__) {
-			this[k] = o[k];
-		}, o2);
+			o2[k] = o[k];
+		});
 		return o2;
 	},
 
 	selMatchValue: function(o,_,__) { // given an object first argument and a regexp this, returns a new object with only properties whose value matches the regexp
-		var o2 = {};
+		var o2 = {}, t=this;
 		Object.keys(o).forEach(function(k,_,__) {
-			if (this.test(o[k])) o2[k] = o[k];
-		}, this);
+			if (t.test(o[k])) o2[k] = o[k];
+		});
 		return o2;
 	},
 
@@ -1081,8 +1043,9 @@ var F= { // the main attraction, F contains everything in mofun.
 	},
 
 	skipWhile: function(r, f, o){ // given an array 1st argument, skips elements until the function of the 2nd argument returns false (called as [].map) then returns rest
-		var i=0;
-		r.every(function(_,__,___){i++; return f.apply(this,arguments); }, o||this);
+		var i=0,u;
+		o=o===u?this:o;
+		r.every(function(_,__,___){i++; return f.apply(o,arguments); });
 		return r.slice(Math.max(0,i-1));
 	},
 	
@@ -1092,6 +1055,14 @@ var F= { // the main attraction, F contains everything in mofun.
 	
 	some: Function.call.bind([].some), // given an array first argument and a function 2nd argument, returns true if any elements cause the function to return truish
 
+	
+	sortBy: function sortBy(r, s) { // a generic sorter using a property, named by arg 2, on an array of objects (arg 1) sorts by the property value
+		var s= /^[\w().]+$/.test(s) ? ("."+s) : ("["+JSON.stringify(s)+"]"),
+		   fn=sortBy[0+s]||(sortBy[0+s]=Function("a, b","return  (a"+s+" > b"+s+" ? 1 : ( (a"+s+" === b"+s+") ? 0 : -1 ));"));
+		   
+		return r.sort(fn);
+	},
+	
 	sortDate: function(d, d2) { // a fast numerical sorter for ordering arrays of Dates from oldest to newest
 		return d - d2;
 	},
@@ -1111,6 +1082,7 @@ var F= { // the main attraction, F contains everything in mofun.
 	},
 
 	sortProperty: function(o, o2) { // a generic sorter using a property, named by this, on an array of objects that returns 0 for a match, and 1 of the first argument is more than the 2nd
+		"use strict";
 		o = o[this];
 		o2 = o2[this];
 		return o > o2 ? 1 : ((o == o2) - 1);
@@ -1127,6 +1099,7 @@ var F= { // the main attraction, F contains everything in mofun.
 	},
 
 	startsWith: function(s,_,__) { // returns true if the argument starts with this. use "".startsWith to go from this to the first argument
+		"use strict";
 		return s.indexOf(this) === 0;
 	},
 
@@ -1139,10 +1112,11 @@ var F= { // the main attraction, F contains everything in mofun.
 	},
 
 	substr: function(sr,_,__) { // return part of a string (or array) based on [start, [end]] array given to this
-		return sr.slice(this[0]||0, this[1]||9e9);
+		return sr.slice(+this[0]||+this||0, this[1]||9e9);
 	},
 	
 	subtract: function(n,_,__) { // subtracts this from a numerical first argument. 
+		"use strict";
 		return n - this;
 	},
 
@@ -1165,24 +1139,29 @@ var F= { // the main attraction, F contains everything in mofun.
 	},
 
 	surround: function(s,_,__) { // surrounds a stringy first argument with a stringy this value
+		"use strict";
 		return this + s + this;
 	},
 
 	tag: function(s,_,__) { // makes an html tag, name specified by this, wrapping around the value of the first argument
+		"use strict";
 		return "<" + this + ">" + s + "</" + this + ">";
 	},
 
 	tail: function(sr) { // returns the last value(s) of the first argument. Pass an index to return the values of the array from that index onward.
+		"use strict";
 		return sr.slice(-1 * (+this||9e9));
 	},
 
 	takeWhile: function(r, f, o){ // given an array 1st argument, returns elements until the function of the 2nd argument returns false (called as [].map)
-		var i=0;
-		r.every(function(){i++; return f.apply(this,arguments); }, o||this);
+		var i=0,u;
+		o=o===u?this:o;
+		r.every(function(){i++; return f.apply(o,arguments); });
 		return r.slice(0, Math.max(0,i-1));
 	},
 	
 	template: function(o, _, __) { // given a string this and an object first argument, injects own property of that object into that string via {{key}} placeholders
+		"use strict";
 		var r= ("" + this).split("{{"),
 			s= "";
 		for (var i= 0, m= r.length; i < m; i++) {
@@ -1193,29 +1172,35 @@ var F= { // the main attraction, F contains everything in mofun.
 	},
 
 	that: function(_,__,___) { // returns this, like F.fill() without the dynamic capability of accepting functions.
+		"use strict";
 		return this;
 	},
 
 	this2a: function(v,_,__) { // run method given by this on object given by first argument. unlike F.run(), the argument becomes this. use w/ methods like "".toLowerCase
+		"use strict";
 		return this.call(v);
 	},
 
 	flip: function(f) { // for a 1-arg function, returns a new function from a function given as the first argument that flips this and the first argument 
+		"use strict";
 		return function(v) {
 			return f.call(v, this);
 		}
 	},
 	
 	tee: function(a,_,__){ // runs a function specified by this on the first argument and returns the first argument
+		"use strict";
 		this(a);
 		return a
 	},
 
 	thisAt: function(s,_,__) { // given a key, returns this at the key
+		"use strict";
 		return this[s];
 	},
 
 	thisOverA: function(n,_,__) { // returns this over the first argument (division)
+		"use strict";
 		return this / n;
 	},
 
@@ -1226,18 +1211,26 @@ var F= { // the main attraction, F contains everything in mofun.
 	timer: 	typeof performance !== "undefined" ? performance.now.bind(performance) : Date.now , // returns a time in ms 
 
 	times: function(n,_,__) { // multiplies the first argument by a numerical this value 
+		"use strict";
+		return n * this;
+	},
+
+	timesStrict: function(n,_,__) { // multiplies the first argument by a numerical this value 
+		"use strict";
 		return n * this;
 	},
 
 	toArray: Function.call.bind([].slice), // turns an array-like value into a true Array
 
 	to$: function(f) { // converts a function written for [].filter for use with $.filter, or [].forEach to $.each, or vice versa
+		"use strict";
 		return function(a, b, c) {
 			return f.call(this, b, a, c);
 		}
 	},
 
 	toFixed: function(n,_,__) { // limits the decimal places of a numerical first argument by this # of spaces, defaults to 2 if this is non-numeric
+		"use strict";
 		return ((1 * n) || 0).toFixed(+this || 2);
 	},
 
@@ -1264,15 +1257,17 @@ var F= { // the main attraction, F contains everything in mofun.
 	ucase: Function.call.bind(String.prototype.toUpperCase), // returns an upper-case version of the value passed to the first argument
 
 	unequal: function(v,_,__) { // returns true if the argument does exactly equal this
+		"use strict";
 		return v !== this;
 	},
 
 	unequiv: function(v,_,__) { // returns true if the argument does not loosely equate to this
+		"use strict";
 		return v != this;
 	},
 
 	unique: function(v, i, r) { // used by [].filter(), returns true of the current item is the only one of it's exact value in the array
-		return r.lastIndexOf(v) == i;
+		return r.indexOf(v) === i;
 	},
 
 	uniqueId: function uniqueId(s){ // returns a unique string, with an optional prefix passed to the first argument
@@ -1281,8 +1276,13 @@ var F= { // the main attraction, F contains everything in mofun.
 	},
 	
 	union: function(r,_,__) { // Computes the list of values that are the intersection of all the arrays. Each value in the result is present in each of the arrays.
-		return r.concat(this).filter(function(a, b, c) {
-			return c.indexOf(a) === b;
+		"use strict";
+		function yes(a, b, c) {return this.indexOf(a) !==-1;}
+	
+		return this.filter(yes, r).concat(
+			r.filter(yes, this)
+		).filter(function(a,b,c){
+			return c.indexOf(a)===b;
 		});
 	},
 
@@ -1299,8 +1299,8 @@ var F= { // the main attraction, F contains everything in mofun.
 	
 	values: function(o) { // returns an array of values from an object given as the first argument
 		return Object.keys(o).map(function(k,_,__) {
-			return this[k];
-		}, o);
+			return o[k];
+		});
 	},
 	
 	visit: function(o, f, c){ // given an object 2st argument and a function 2nd, runs the function on each property, like [].map(). optional this via 3rd arg
@@ -1310,12 +1310,14 @@ var F= { // the main attraction, F contains everything in mofun.
 	},
 
 	where: function(o,_,__) { // returns true for objects containing specific key:value pair defined by an object given as this
-		return Object.keys(this).every(function(k,_,__) {
-			return o[k] === this[k];
-		}, this);
+		var t=this;
+		return Object.keys(t).every(function(k,_,__) {
+			return o[k] === t[k];
+		});
 	},
 
 	without: function(v,_,__) { // returns true if this does not contain the first argument
+		"use strict";
 		return this.indexOf(v) === -1;
 	},
 
