@@ -170,11 +170,6 @@ var F= { // the main attraction, F contains everything in mofun.
 		};
 	},
 
-	at: function(o,_,__){ // given an object first argument, and a index specified as a number or array of numbers as this, returns an array of values at each index
-		"use strict";
-	  return [].concat(this).map(function(k,_,__){return this[k]},o);
-	},
-	
 	avg: function(v, n, c, r) { // returns the numerical average of an array of numbers. [1,2,3].reduce(F.avg)
 		return r.length-1 === c ? 
 			(v + n) / r.length : 
@@ -500,6 +495,14 @@ var F= { // the main attraction, F contains everything in mofun.
 			return a.slice(2, - 2)
 		}).join("\n");
 	},
+	
+	getKey: function(s) { // returns multi-line comments (js/css/php/etc) from a stringy first argument
+		var i=-1, 
+		t=this,
+		ks=Object.keys(this);
+		ks.some(function(a,b){ if(t[a]===s){i=b; return true;}});
+		return ks[i]; 
+	},
 
 	gt: function(v,_,__) { // greater than value compare
 		"use strict";
@@ -636,7 +639,7 @@ var F= { // the main attraction, F contains everything in mofun.
 	},
 
 	isNumerical: function(v) { // returns true if the argument can be used as a number
-		return +v || v === 0;
+		return !!+v || v === 0;
 	},
 
 	isObject: function(v) { // returns true if the argument is an Object (of any kind)
@@ -667,7 +670,7 @@ var F= { // the main attraction, F contains everything in mofun.
 	},
 
 	isURL: RegExp.prototype.test.bind(/https?:\/\/(www.)?[-a-zA-Z0-9@:%._+~#=]{2,256}.[a-z]{2,6}([-a-zA-Z0-9@:%_+.~#?&\/=]*)/), // returns true if the argument is a URL
-
+	
 	k: function(v) { // returns the first argument, alias for K
 		return v;
 	},
@@ -1044,7 +1047,7 @@ var F= { // the main attraction, F contains everything in mofun.
 
 	redact: function(s) { // given a string first argument, replace wordy chars with hash symbols, or a replacement specified by this
 		"use strict";
-		return "".replace.call(s, /(\w+)/, this && this.charAt ? this : "#" );
+		return "".replace.call(s, /(\w)/g, this && this.charAt ? this : "#" );
 	},
 
 	repeat: function(s, n) { // given a string and a number, repeats that string a number of times.
@@ -1262,7 +1265,7 @@ var F= { // the main attraction, F contains everything in mofun.
 	},
 
 	stripComments: function(s) { // removes multi-line comments (js/css/php/etc) from a stringy first argument
-		return (s + "").replace(/\/\*([\w\W]+?)\*\//g, "");
+		return (s + "").replace(/\/\*([\w\W]+?)\*\/{1}/g, "");
 	},
 
 	stripTags: function(s) { // removes well-formed xml and html tags from a stringy first argument
@@ -1373,11 +1376,6 @@ var F= { // the main attraction, F contains everything in mofun.
 		return n * this;
 	},
 
-	timesStrict: function(n,_,__) { // multiplies the first argument by a numerical this value 
-		"use strict";
-		return n * this;
-	},
-
 	toArray: Function.call.bind([].slice), // turns an array-like value into a true Array
 
 	to$: function(f) { // converts a function written for [].filter for use with $.filter, or [].forEach to $.each, or vice versa
@@ -1435,11 +1433,7 @@ var F= { // the main attraction, F contains everything in mofun.
 	
 	union: function(r,_,__) { // Computes the list of values that are the intersection of all the arrays. Each value in the result is present in each of the arrays.
 		"use strict";
-		function yes(a, b, c) {return this.indexOf(a) !==-1;}
-	
-		return this.filter(yes, r).concat(
-			r.filter(yes, this)
-		).filter(function(a,b,c){
+		return this.concat(r).filter(function(a,b,c){
 			return c.indexOf(a)===b;
 		});
 	},
