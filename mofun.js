@@ -1,9 +1,9 @@
-/*	mofun.js v2014.10.2
+/*	mofun.js v2014.10.5  [STABLE]
 	http://danml.com/mofun/
 	(c) 2014 dandavis
 	mofun may be freely distributed under the MIT license as is, or under [CCBY2.0]@dandavis when code comments are stripped (aka minified/uglifies/closured)
 
-Contains many standalone functional programming helpers, function composers, comparators, sorters, filters, common transforms, and much more.
+Contains many standalone functional programming helpers, function composers, iterations, comparators, sorters, filters, common transforms, and much more.
 
 ----------
 a few code comments were taken from the following great projects:
@@ -70,7 +70,7 @@ var F= { // the main attraction, F contains everything in mofun.
 			return typeof v != "function" ? 
 				r.some(function(f,_,__){return f.call(r,v,k)===false;}) : 
 				del===true ? 
-					r.splice(r.indexOf(v), 1) : 
+					((_=r.indexOf(v))!==-1 && r.splice(_, 1)) : 
 					r.unshift(v);
 		};
 	}, 
@@ -105,6 +105,13 @@ var F= { // the main attraction, F contains everything in mofun.
 		return o;
 	},
 
+	addProperties: function(o,_,__) { // given an object as this, sets a property on the first argument named and set by the keys and values of the this object; a merge. used to be called setProps
+		Object.keys(this).forEach(function(k,_,__) {
+			o[k] = this[k];
+		}, this);
+		return o;
+	},
+	
 	addNumber: function(n,_,__) { // adds this onto the first argument. coerces to Number to avoid accidental concatenation. 
 		"use strict";
 		return +n + +this;
@@ -259,10 +266,6 @@ var F= { // the main attraction, F contains everything in mofun.
 		return v.valueOf.bind(v);
 	},
 	
-	contains: function(sr,_,__) { // returns true if the argument contains the value specified by this as one of it's accessor properties
-		return sr.indexOf(this) > -1;
-	},
-
 	count: function(o, v, i,_) { // for [].reduce, given an object and array of value, adds a value count to the object under a key set by the value. 
 		if (i === 1) o = {};
 		o[v] = o[v] ? (o[v] + 1) : 1;
@@ -337,16 +340,12 @@ var F= { // the main attraction, F contains everything in mofun.
 		Object.defineProperty(o, s, d);
 	},
 	
-	defined: function(v) { // returns true if the argument is not undefined or null
-		return v != null;
-	},
-
 	delta: function(v, n, r) { // used with [].map/filter, returns the difference with the last element, or 0.
 		return n ? (r[n - 1] - v) : 0;
 	},
 
 	difference: function(v,_,__) { // Similar to without, but returns the values from argument that are not present in this
-		return this.indexOf(v) === -1;
+		return v.indexOf(this) === -1;
 	},
 
 	divide: function(n,_,__) { // divides this by a numerical first argument. 
@@ -751,11 +750,6 @@ var F= { // the main attraction, F contains everything in mofun.
 		return o;
 	},
 
-	match: function(sr,_,__) { // returns true if the argument contains a match of a value given as this. fast binary compare
-		"use strict";
-		return sr.indexOf(this) !== -1;
-	},
-
 	matches: function(sr,_,__) { // returns true if the argument matches a value (string or regexp (or any value with arrays)) given as this
 		"use strict";
 		if(typeof sr==="string") return sr.search(this) !== -1;
@@ -772,7 +766,7 @@ var F= { // the main attraction, F contains everything in mofun.
 		return isNaN(x) ? sr[~~i-1] : x; 
 	},
 	
-	memomize: function(f) { // memorizes calls to the function given by the first argument by it's first argument, returning the stored value if available
+	memoize: function(f) { // memorizes calls to the function given by the first argument by it's first argument, returning the stored value if available
 		var cache = {}, has = cache.hasOwnProperty.bind(cache);
 		return function(x) {
 			return has(x) ? cache[x] : (cache[x] = f.apply(this.arguments));
@@ -1161,18 +1155,6 @@ var F= { // the main attraction, F contains everything in mofun.
 		return o2;
 	},
 
-	setProp: function(o,_,__) { // given a 2-slot array as this, sets a property on the first argument named by the first this element with a value of the 2nd this element
-		o[this[0]] = this[1];
-		return o;
-	},
-
-	setProps: function(o,_,__) { // given an object as this, sets a property on the first argument named and set by the keys and values of the this object; a merge
-		Object.keys(this).forEach(function(k,_,__) {
-			o[k] = this[k];
-		}, this);
-		return o;
-	},
-
 	shuffle: function(v, i, r) { // used with [].map to randomize the order of elements in an array
 		var out = i ? r.r : r.r = r.slice(),
 			ol = out.length;
@@ -1193,7 +1175,7 @@ var F= { // the main attraction, F contains everything in mofun.
 	},
 	
 	slice: function(n,_,__) { // returns the first # of items from a string or array argument, specified by a numerical this value
-		return [].slice.call(n, + this || 0);
+		return [].slice.call(n, 0, +this || 9e9);
 	},
 	
 	smallest: function(v,v2,_,__){ // use w/ reduce to find smallest value in 1st arg array. the lowest number, most oldest date, or first alphabetical string.
