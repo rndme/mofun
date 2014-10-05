@@ -83,10 +83,6 @@ var F= { // the main attraction, F contains everything in mofun.
 		};
 	},
 
-	K: function(v) { // the identity function returns the first argument
-		return v;
-	},
-
 	_: Function.call.bind([].slice), // turns an array-like thing (NodeList, arguments, etc) into a true Array
 
 	a: function(a, b, c) { //returns the first argument, alias for K
@@ -1410,7 +1406,7 @@ var F= { // the main attraction, F contains everything in mofun.
 
 	uniqueId: function uniqueId(s){ // returns a unique string, with an optional prefix passed to the first argument
 		uniqueId.id=uniqueId.id||0;
-		return (prefix||"")+uniqueId.id++;
+		return (s||"")+uniqueId.id++;
 	},
 	
 	union: function(r,_,__) { // Computes the list of values that are the intersection of all the arrays. Each value in the result is present in each of the arrays.
