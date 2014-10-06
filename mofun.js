@@ -350,7 +350,7 @@ var F= { // the main attraction, F contains everything in mofun.
 
 	each: Function.call.bind([].forEach), // given an array as the first argument and a function as the 2nd, execute the function on each element in the array.
 	
-	endsWith: function(s,_,__) { // returns true if the argument ends with this
+	endsWith:"".endsWith ? Function.call.bind("".endsWith) : function(s,_,__) { // returns true if the argument ends with this
 		"use strict";
 		return s.lastIndexOf(this) + this.length === s.length;
 	},
@@ -433,7 +433,7 @@ var F= { // the main attraction, F contains everything in mofun.
 			o= [],
 			i= 0;
 			
-		if(f.split) f= filter[0+f] || (filter[0+f]=Function("a,b,c","return "+ f+";")) ;
+		if(f.split) f= filter[0+f] || (filter[0+f]=Function("a,b,c",'"use strict";return '+ f+";")) ;
 		
 		if(v==null){
 			for(; i<m; i++) if(f(r[i],i,r)) o.push(r[i]);
@@ -472,7 +472,7 @@ var F= { // the main attraction, F contains everything in mofun.
 		"use strict";
 		if(!r||!f){return;}
 		var m= r.length, i= 0;
-		if(f.split) f= forEach[0+f] || (forEach[0+f]=Function("a,b,c","return "+ f)) ;
+		if(f.split) f= forEach[0+f] || (forEach[0+f]=Function("a,b,c",'"use strict"; return '+ f)) ;
 		if(v==null){
 			for (; i<m; i++) f(r[i],i,r);
 		}else{
@@ -736,7 +736,7 @@ var F= { // the main attraction, F contains everything in mofun.
 			o= [],
 			i= 0;
 			
-		if(f.split) f= map[0+f] || (map[0+f]=Function("a,b,c","return "+ f)) ;
+		if(f.split) f= map[0+f] || (map[0+f]=Function("a,b,c",'"use strict";return '+ f)) ;
 		
 		if(v==null){
 			for (; i<m; i++) o[i]= f(r[i],i,r);
@@ -964,6 +964,7 @@ var F= { // the main attraction, F contains everything in mofun.
 	},
 
 	property: function(k){ //returns a function that returns a property named by the first argument on an object passed to it's first argument. ~50% faster than F.pluck
+		"use strict";
 		return function(o,_,__){return o[k];};
 	},
 
@@ -1020,7 +1021,7 @@ var F= { // the main attraction, F contains everything in mofun.
 		var	m=r.length-1,
 			i=0,u;
 			if(v===u) v= r[i];
-			if(f.split) f= reduce[0+f]||(reduce[0+f]=Function("a,b,c,d","return "+f));
+			if(f.split) f= reduce[0+f]||(reduce[0+f]=Function("a,b,c,d",'"use strict"; return '+f));
 		for(; i<m; i+=2) { // unroll X2 for better large-array perf
 			v=f(v, r[i], i, r);
 			v=f(v, r[i+1], i+1, r);
@@ -1182,8 +1183,9 @@ var F= { // the main attraction, F contains everything in mofun.
 
 	
 	sortBy: function sortBy(r, s) { // a generic sorter using a property, named by arg 2, on an array of objects (arg 1) sorts by the property value
+		"use strict";
 		var s= /^[\w().]+$/.test(s) ? ("."+s) : ("["+JSON.stringify(s)+"]"),
-		   fn=sortBy[0+s]||(sortBy[0+s]=Function("a, b","return  (a"+s+" > b"+s+" ? 1 : ( (a"+s+" === b"+s+") ? 0 : -1 ));"));
+		   fn=sortBy[0+s]||(sortBy[0+s]=Function("a, b",'"use strict";return  (a'+s+" > b"+s+" ? 1 : ( (a"+s+" === b"+s+") ? 0 : -1 ));"));
 		   
 		return r.sort(fn);
 	},
@@ -1237,7 +1239,7 @@ var F= { // the main attraction, F contains everything in mofun.
 		return n * n;
 	},
 
-	startsWith: function(s,_,__) { // returns true if the argument starts with this. use "".startsWith to go from this to the first argument
+	startsWith: "".startsWith ? Function.call.bind("".startsWith) : function(s,_,__) { // returns true if the argument starts with this. use "".startsWith to go from this to the first argument
 		"use strict";
 		return s.indexOf(this) === 0;
 	},
@@ -1434,8 +1436,9 @@ var F= { // the main attraction, F contains everything in mofun.
 	},
 	
 	visit: function(o, f, c){ // given an object 2st argument and a function 2nd, runs the function on each property, like [].map(). optional this via 3rd arg
-		var r={},x
-		for(var it in o) if((x=f.call(c===undefined?o:c,o[it],it,o))!=null) r[it]=x ;
+		var r={}, x;
+		c= c===undefined ? o : c;
+		for(var it in o) if((x=f.call(c,o[it],it,o))!=null) r[it]=x ;
 		return r;
 	},
 
@@ -1463,13 +1466,15 @@ var F= { // the main attraction, F contains everything in mofun.
 	
 	
 	xCOUNTA: function(r) { // returns a count of the non-empty values in an array passed to the first argument or all args
-		var a=arguments;if(a.length>1) r=Array.apply(null,a);
+		var a=arguments;
+		if(a.length>1) r=Array.apply(null,a);
 		if(!r||!r.length) return 0;
 		return [].filter.call(String).length;
 	},
 
 	xCOUNT: function(r) { // returns a count of the non-empty values in an array passed to the first argument or all args
-		var a=arguments;if(a.length>1) r=Array.apply(null,a);
+		var a=arguments;
+		if(a.length>1) r=Array.apply(null,a);
 		if(!r||!r.length) return 0;		
 		return [].filter.call(r, isFinite).length;
 	},
