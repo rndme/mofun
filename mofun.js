@@ -142,7 +142,7 @@ var F= { // the main attraction, F contains everything in mofun.
 		"use strict";
 		return function(_,__,___) {
 			var r=Array.apply(null,arguments);
-			r[n]=v;
+			r[n]= (typeof v==="function") ? v(r[n]) : v;
 		 return call===true? f.apply(r[0], r.slice(1)) : f.apply(this, r);
 		};
 	}, 
