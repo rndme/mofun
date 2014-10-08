@@ -142,7 +142,7 @@ var F= { // the main attraction, F contains everything in mofun.
 		"use strict";
 		return function(_,__,___) {
 			var r=Array.apply(null,arguments);
-			r[n]= (typeof v==="function") ? v(r[n]) : v;
+			r[n]=v;
 		 return call===true? f.apply(r[0], r.slice(1)) : f.apply(this, r);
 		};
 	}, 
@@ -340,10 +340,6 @@ var F= { // the main attraction, F contains everything in mofun.
 		return n ? (r[n - 1] - v) : 0;
 	},
 
-	difference: function(v,_,__) { // Similar to without, but returns the values from argument that are not present in this
-		return v.indexOf(this) === -1;
-	},
-
 	divide: function(n,_,__) { // divides this by a numerical first argument. 
 		return n / this;
 	},
@@ -415,7 +411,7 @@ var F= { // the main attraction, F contains everything in mofun.
 
 	f: function f(s, n) { // a quick function maker from a string of code passed as the first argument. prepends "return " is not present in first argument.
 		"use strict";
-		if(typeof f==="string") return f; // make harmless
+		if(typeof s==="function") return s; // make harmless
 		return f["CACHE_"+s+n] || (f["CACHE_"+s+n]=Function(  // make a new function:
 			"a,b,c,d,e,f,g,h,i".split(",").slice(0, (typeof n==="number")? n : 3) , //determine arity, defaulting to 3 for map/filter arity
 			(s.indexOf("return")>-1?"":"return ") + s+";")
@@ -518,6 +514,16 @@ var F= { // the main attraction, F contains everything in mofun.
 		});
 		return ret;
 	},
+
+	group: function(r, n){ // given an array first argument and a sub-array width 2nd argument, returns a new array with sub-arrays of the specified length
+		var o= [],
+			i= 0,
+			m= r.length;
+			n|| (n= 2);
+		for(; i<m; i+=n) o.push(r.slice(i, i + n));
+	  return o;
+	},
+
 
 	guard: function(v, n) { //given a function, limits the accepted # of arguments to that function to the number specified by the 2nd argument. prevents array methods from seeing the collection.
 		return function() {
@@ -901,9 +907,15 @@ var F= { // the main attraction, F contains everything in mofun.
 		return (""+s).charCodeAt(0);
 	},
 	
-	pairMap: function(r,_,__) { // applies a function specified by this to an array by the first argument
-		"use strict";
-		return this.apply(r[0], r);
+	pad: function(s, n, s2) { // pads/trims the left side of a string first argument with 3rd argument (or spaces) until length is == 2nd argument.
+        s2||(s2=" ");
+        return n > s.length ? Array((1+n)-s.length).join(s2)+s : s.slice(0,n);
+	},
+	
+	pairs2object: function(r, o){ // given a 2d array of 2-col sub-arrays, returns an object with keys defined by each subarray[0] and values from subarray[1]. reverts F.obMap output back to an object.
+		o=Object(o||{});
+		r.forEach(function(a,b,c){ o[a[0]]=a[1]; });
+		return o;
 	},
 
 	partial: function(fn) { // Partially apply a function in the first arguments by filling in any number of its arguments, without changing its dynamic this value. 
@@ -1018,15 +1030,14 @@ var F= { // the main attraction, F contains everything in mofun.
 
 	reduce: function reduce(r, f, v) { // given an array as the first argument and a function as the 2nd,  perform a reduction on the array, left to right
 		"use strict";
-		var	m=r.length-1,
-			i=0,u;
-			if(v===u) v= r[i];
+		var	m=r.length,
+			i=0, u;
+			if(v===u){ v= r[i++]; };
 			if(f.split) f= reduce[0+f]||(reduce[0+f]=Function("a,b,c,d",'"use strict"; return '+f));
-		for(; i<m; i+=2) { // unroll X2 for better large-array perf
-			v=f(v, r[i], i, r);
-			v=f(v, r[i+1], i+1, r);
+		for(; i<m; i++) {
+			v=f(v, r[i],   i,   r);
 		}
-		return (++i<r.length) ? f(v, r[i], i, r) : v ;
+		return v;
 	}, 
 		
 	regexp: RegExp.prototype.test, // used with [].filter to match array elements with a regular expression
@@ -1106,6 +1117,11 @@ var F= { // the main attraction, F contains everything in mofun.
 
 	round: Math.round, // returns an integer closest to the number passed to the first argument
 
+	rPad: function(s, n, s2) { // pads/trims the right side of a string first argument with 3rd argument (or spaces) until length is == 2nd argument.
+        s2||(s2=" ");
+        return n > s.length ? s + Array((1+n)-s.length).join(s2) : s.slice(0,n);
+	},
+	
 	rPartial: function(f) { // Partially apply a function in the first arguments, later filling in any number of the result's arguments. 
 		"use strict";
 		var args = [].slice.call(arguments, 1);
@@ -1511,6 +1527,11 @@ var F= { // the main attraction, F contains everything in mofun.
 		r.some(function(a,b,c){ if(a[s]==v){ v2=b; return true;} });
 		v=r[v2];
 	  return v && s2 ? v[s2] : v;
+	},
+	
+	xor: function xor(r1, r2){ // given two arrays, returns just the elements present in only 1 of the arrays, but not in both
+		function no(a,b,c){return this.indexOf(a)===-1;}
+		return r1.filter(no, r2).concat(r2.filter(no, r1));
 	},
 	
 	zip: function(v, i,_) { // create a new array of the argument and this at the slot given by the 2nd argument
