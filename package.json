@@ -1,0 +1,32 @@
+{
+"name":		"mofun",
+"main": 	"mofun.js",
+"version":	"1.0.0",
+"description":	"100s of standalone low-level helpers, higher-order functions, sorts, and utilities",
+
+
+"keywords":		["functional programming","pure functions","map/reduce"],
+"homepage":		"http://danml.com/mofun/",
+"license":		"CC-BY-4.0",
+"author":
+  { 
+	"name": 	"dandavis",
+	"email": 	"rndme@users.noreply.github.com"
+	"url": 		"http://danml.com/"
+  }
+"repository":
+  { 	
+	"type": 	"git",
+	"url":  	"https://github.com/rndme/mofun.git"
+  },
+"bugs":
+  { 
+	"email": 	"rndme@users.noreply.github.com"
+  },
+"files":	[
+	"mofun.js", 
+	"mofun.min.js"
+],
+  
+  
+}
