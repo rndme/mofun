@@ -12,6 +12,16 @@ mofun.js is not a functional framework like Prototype.js, Oliver Steele's functi
 mofun.js compliments shortcomings in other-wise great libraries like Prototype.js and Underscore by providing common and highly-recyclable low-level helpers that eliminate many of the specialized anonymous functions typical of functional javascript programming. Those libraries provide a framework to build, mofun.js provides pre-fabricated modules to attach to that framework. These days, you don't really need underscore or prototype to underpin the handy functional style; it's built into any browser since IE9, and IE8 can be easily polyfilled to support mofun. If vanilla is too plain, mofun.js plays well with virtually any framework. Run fast, pack light, don't pollute, and never ever repeat yourself: mofun.js.
 
 
+Usage
+-------------
+browsers:  `<script src=mofun.min.js></script>`
+node.js:   `nmp install mofun`
+
+
+
+
+
+
 Project Page
 --------------
 Visit the [project page](http://danml.com/mofun/) for examples, annoted source, and more 
