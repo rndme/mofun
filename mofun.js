@@ -1,12 +1,12 @@
 /*@preserve
-	mofun.js v1.0.1  [STABLE] 
+	mofun.js 
+	v1.0.0 , updated 2014-10-5
 	http://danml.com/mofun/
 	(c) 2014 dandavis
 	mofun may be freely distributed under 
-	[CCBY4.0]@dandavis
-*//*
-
-Or when code comments are stripped,	the MIT license.
+	[CCBY4.0]@dandavis *//*, Or with these and all code comments, under the MIT license.
+	
+	
 Contains many standalone functional programming helpers, function composers, iterations, comparators, sorters, filters, common transforms, and much more.
 
 ----------
