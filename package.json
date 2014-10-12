@@ -11,9 +11,9 @@
 "author":
   { 
 	"name": 	"dandavis",
-	"email": 	"rndme@users.noreply.github.com"
+	"email": 	"rndme@users.noreply.github.com",
 	"url": 		"http://danml.com/"
-  }
+  },
 "repository":
   { 	
 	"type": 	"git",
@@ -26,7 +26,7 @@
 "files":	[
 	"mofun.js", 
 	"mofun.min.js"
-],
+]
   
   
 }
