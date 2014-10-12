@@ -14,8 +14,14 @@ mofun.js compliments shortcomings in other-wise great libraries like Prototype.j
 
 Usage
 -------------
-browsers:  `<script src=mofun.min.js></script>`
-node.js:   `nmp install mofun`
+browsers:  `<script src=mofun.min.js></script>`  (as _window.F or AMD name)
+
+node.js:   `npm install mofun`
+
+
+
+
+
 
 
 
