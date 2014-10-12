@@ -26,7 +26,12 @@
 "files":	[
 	"mofun.js", 
 	"mofun.min.js"
-]
-  
+],
+
+"npmName": 	"mofun",
+	"npmFileMap": [{
+		"basePath": "/",
+		"files": ["*.js"]
+  }]
   
 }
