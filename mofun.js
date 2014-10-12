@@ -1,8 +1,12 @@
-/*	mofun.js v2014.10.5  [STABLE]
+/*@preserve
+	mofun.js v1.0.1  [STABLE] 
 	http://danml.com/mofun/
 	(c) 2014 dandavis
-	mofun may be freely distributed under the MIT license as is, or under [CCBY2.0]@dandavis when code comments are stripped (aka minified/uglifies/closured)
+	mofun may be freely distributed under 
+	[CCBY4.0]@dandavis
+*//*
 
+Or when code comments are stripped,	the MIT license.
 Contains many standalone functional programming helpers, function composers, iterations, comparators, sorters, filters, common transforms, and much more.
 
 ----------
@@ -569,13 +573,17 @@ var F= { // the main attraction, F contains everything in mofun.
 		return v[this](v);
 	},
 
-	is:  Object.is || function(v, v2) {return v === v2 || (isNaN(v) && isNaN(v2));}, // returns true if the first argument is the same as the 2nd
+	is: function is(v, v2){ // returns true if the first argument is the same as the 2nd
+		return v === v2 || (isNaN(v) && isNaN(v2));
+	}, 
 
-	isArray: Array.isArray.bind(Array), // returns true if the argument is an array
 
 	isBoolean: function(v) { // returns true if the argument is a strict boolean value
 		return v === true || v === false;
 	},
+	
+	isArray: Array.isArray.bind(Array), // returns true if the argument is an array
+
 
 	isDate: function(v) { // returns true if the argument is a proper Date object
 		return v && v.constructor === Date;
