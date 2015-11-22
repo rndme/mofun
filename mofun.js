@@ -471,6 +471,7 @@ var F= { // the main attraction, F contains everything in mofun.
 	forEach: function forEach(r,f,v){ // given an array as the first argument and a function as the 2nd, execute the function on each element in the array.
 		"use strict";
 		if(arguments.length<2) return;
+		if(f.split) f= forEach[0+f] || (forEach[0+f]=Function("a,b,c",'"use strict"; return '+ f)) ;
 		var m=r.length, i=0, b;
 		if(v!=b)f=f.bind(v);
 		for(; i<m; i++) f(r[i], i, r);
