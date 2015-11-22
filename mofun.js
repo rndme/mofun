@@ -428,6 +428,7 @@ var F= { // the main attraction, F contains everything in mofun.
 	},
 
 	filter: function filter(r, f, v) { // like [].filter except: arg1+2 can be string, sparse arrays are visited, callback's 3rd arg is orig (not clone), faster.
+		"use strict";
 		var m= r.length,
 		o= [],
 		i= 0, b;		
