@@ -470,14 +470,10 @@ var F= { // the main attraction, F contains everything in mofun.
 
 	forEach: function forEach(r,f,v){ // given an array as the first argument and a function as the 2nd, execute the function on each element in the array.
 		"use strict";
-		if(!r||!f){return;}
-		var m= r.length, i= 0;
-		if(f.split) f= forEach[0+f] || (forEach[0+f]=Function("a,b,c",'"use strict"; return '+ f)) ;
-		if(v==null){
-			for (; i<m; i++) f(r[i],i,r);
-		}else{
-			for (; i<m; i++) f.call(v,r[i],i,r);
-		}	
+		if(arguments.length<2) return;
+		var m=r.length, i=0, b;
+		if(v!=b)f=f.bind(v);
+		for(; i<m; i++) f(r[i], i, r);
 	}, 
 
 	formatNumber: function(n) { // returns a pretty string from a numerical first argument with commas separating out large numbers. set this a number to limit the # of decimals
