@@ -428,17 +428,14 @@ var F= { // the main attraction, F contains everything in mofun.
 	},
 
 	filter: function filter(r, f, v) { // like [].filter except: arg1+2 can be string, sparse arrays are visited, callback's 3rd arg is orig (not clone), faster.
-		"use strict";
 		var m= r.length,
-			o= [],
-			i= 0;
-			
-		if(f.split) f= filter[0+f] || (filter[0+f]=Function("a,b,c",'"use strict";return '+ f+";")) ;
-		
-		if(v==null){
-			for(; i<m; i++) if(f(r[i],i,r)) o.push(r[i]);
+		o= [],
+		i= 0, b;		
+		if(typeof f==="string") f= filter[0+f] || (filter[0+f]=Function("a,b,c",'"use strict";return '+ f+";")) ;
+		if(v==b){
+			for(; i<m; i++) if(f(b=r[i],i,r)) o.push(b);
 		}else{
-			for(; i<m; i++) if(f.call(v,r[i],i,r)) o.push(r[i]);
+			for(; i<m; i++) if(f.call(v,b=r[i],i,r)) o.push(b);
 		}
 		return o;
 	},
