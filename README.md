@@ -3,6 +3,9 @@ mofun
 
 Make JS mo' fun by writing less of it via functional programming
 
+
+note: not actively maintained...
+
 About
 --------------
 mofun.js is special because it's a vanilla-flavored collection of stand-alone functions. Most of the functions use this to avoid hard-coding a one-off anonymous function for a simple sub-task. Think of this in JS as a function argument that gets called in a different way than the formal parameters (since that's exactly what this is). By using this to send one more customization to the function logic, generic functions become viable in a whole lot of places that used to require a customized anonymous function. In short, the literal "function" will appear a lot less in code using mofun.
