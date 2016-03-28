@@ -1164,6 +1164,7 @@ var F= { // the main attraction, F contains everything in mofun.
 	},
 
 	selMatchValue: function(o,_,__) { // given an object first argument and a regexp this, returns a new object with only properties whose value matches the regexp
+		"use strict";
 		var o2 = {}, t=this;
 		Object.keys(o).forEach(function(k,_,__) {
 			if (t.test(o[k])) o2[k] = o[k];
